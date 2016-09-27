@@ -50,11 +50,10 @@ app.on('activate', function () {
 
 expressApp.get('*\.html', (req, res) => {
 	getFileContents(req, (contents) => {
-		win.webContents.executeJavaScript("updateIframe('" + encodeURI(contents) + "')")
+		callbackUpdateIframe(contents, callbackGetDomInsideIframe)
 	})
 
-	res.end('Actually get the HTML here, render it on the win\'s browser window\'s iframe, \
-		then send the serialized DOM HTMLString as the res.')
+	res.end('How do I access the DOM inside the iframe? :\'(')
 })
 
 // Server request handlers
@@ -90,4 +89,18 @@ function getFileContents(req, callback) {
 			callback(contents)
 		}
 	)
+}
+
+// Callbacks to handle updating iFrame & getting DOM object
+
+function callbackUpdateIframe(contents, callback) {
+	win.webContents.executeJavaScript("updateIframe('" + encodeURI(contents) + "')")
+	callback()
+}
+
+function callbackGetDomInsideIframe() {
+	// TODO: Figure out how to access the DOM tree in order to serialize and send it as the response
+	// ipc cannot access webview events :(
+	// HELP
+	console.log("trying to figure this out TODO")
 }
