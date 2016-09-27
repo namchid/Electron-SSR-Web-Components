@@ -50,7 +50,6 @@ app.on('activate', function () {
 
 expressApp.get('*\.html', (req, res) => {
 	getFileContents(req, (contents) => {
-		var encodedURI = 
 		win.webContents.executeJavaScript("updateIframe('" + encodeURI(contents) + "')")
 	})
 
