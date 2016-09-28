@@ -12,6 +12,8 @@ const fs = require('fs'),
 
 let win
 
+var gRes = null
+
 // Setup for Electron app
 
 function createWindow() {
@@ -29,12 +31,6 @@ function createWindow() {
 			console.log("Listening on port: " + port)
 		})
 	})
-
-	// IPC functions
-	ipcMain.on('receiveSerializedDOM', (_, contents) => {
-		console.log(contents)
-		// TODO: write serialized obj to res (use yet another callback)
-	})
 }
 
 app.on('ready', createWindow)
@@ -51,6 +47,15 @@ app.on('activate', function () {
   }
 })
 
+// IPC functions
+ipcMain.on('receiveSerializedDOM', (_, contents) => {
+	gRes.end(contents)
+
+	// if(gRes.finished) {
+	// 	console.log("Res is [correctly] stopped")
+	// }
+})
+
 
 // Server routes
 
@@ -59,7 +64,10 @@ expressApp.get('*\.html', (req, res) => {
 		callbackUpdateIframe(contents, callbackGetDomInsideIframe)
 	})
 
-	res.end('How do I access the DOM inside the iframe? :\'(')
+	gRes = res
+	// if(!gRes.finished) {
+	// 	console.log("Res is [correctly] still running")
+	// }
 })
 
 // Server request handlers
@@ -105,5 +113,5 @@ function callbackUpdateIframe(contents, callback) {
 }
 
 function callbackGetDomInsideIframe() {
-	win.webContents.executeJavaScript("getSerializedDOM('')");
+	win.webContents.executeJavaScript(`getSerializedDOM('')`);
 }
