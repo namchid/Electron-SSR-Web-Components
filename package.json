@@ -4,7 +4,8 @@
   "version": "0.1.0",
   "main": "server.js",
   "dependencies": {
-  	"express": "^4.x"
+  	"express": "^4.x",
+  	"dom-serialize": "2.2.1"
   }
 }
 

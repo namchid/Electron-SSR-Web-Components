@@ -1,7 +1,7 @@
 const electron = require('electron'),
 	app = electron.app,
 	BrowserWindow = electron.BrowserWindow,
-	ipc = electron.ipcMain;
+	ipcMain = electron.ipcMain
 
 const express = require('express'),
 	expressApp = express(),
@@ -28,6 +28,12 @@ function createWindow() {
 		expressApp.listen(port, () => {
 			console.log("Listening on port: " + port)
 		})
+	})
+
+	// IPC functions
+	ipcMain.on('receiveSerializedDOM', (_, contents) => {
+		console.log(contents)
+		// TODO: write serialized obj to res (use yet another callback)
 	})
 }
 
@@ -91,7 +97,7 @@ function getFileContents(req, callback) {
 	)
 }
 
-// Callbacks to handle updating iFrame & getting DOM object
+// Callbacks to handle updating iFrame & getting serialized DOM object
 
 function callbackUpdateIframe(contents, callback) {
 	win.webContents.executeJavaScript("updateIframe('" + encodeURI(contents) + "')")
@@ -99,8 +105,5 @@ function callbackUpdateIframe(contents, callback) {
 }
 
 function callbackGetDomInsideIframe() {
-	// TODO: Figure out how to access the DOM tree in order to serialize and send it as the response
-	// ipc cannot access webview events :(
-	// HELP
-	console.log("trying to figure this out TODO")
+	win.webContents.executeJavaScript("getSerializedDOM('')");
 }
