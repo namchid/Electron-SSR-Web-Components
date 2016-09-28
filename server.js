@@ -50,24 +50,22 @@ app.on('activate', function () {
 // IPC functions
 ipcMain.on('receiveSerializedDOM', (_, contents) => {
 	gRes.end(contents)
-
-	// if(gRes.finished) {
-	// 	console.log("Res is [correctly] stopped")
-	// }
 })
 
 
 // Server routes
-
 expressApp.get('*\.html', (req, res) => {
 	getFileContents(req, (contents) => {
 		callbackUpdateIframe(contents, callbackGetDomInsideIframe)
 	})
 
 	gRes = res
-	// if(!gRes.finished) {
-	// 	console.log("Res is [correctly] still running")
-	// }
+})
+
+expressApp.get('*', (req, res) => {
+	getFileContents(req, (contents) => {
+		res.end(contents)
+	})
 })
 
 // Server request handlers
@@ -106,7 +104,6 @@ function getFileContents(req, callback) {
 }
 
 // Callbacks to handle updating iFrame & getting serialized DOM object
-
 function callbackUpdateIframe(contents, callback) {
 	win.webContents.executeJavaScript("updateIframe('" + encodeURI(contents) + "')")
 	callback()
