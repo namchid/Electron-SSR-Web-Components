@@ -13,6 +13,7 @@ const fs = require('fs'),
 let win
 
 var gRes = null
+var mimeType = ''
 
 // Setup for Electron app
 
@@ -65,7 +66,9 @@ expressApp.get('*\.html', (req, res) => {
 
 expressApp.get('*', (req, res) => {
 	getFileContents(req, (contents) => {
+        res.writeHead(200, {'Content-Type': mimeType});
 		res.end(contents)
+        mimeType = ""
 	})
 })
 
@@ -81,6 +84,8 @@ function getFileContents(req, callback) {
 		'readable',
 		() => {
 			var data = rstream.read()
+            mimeType = getMimeType(filename)
+
 			switch(typeof data) {
 				case 'string':
 					contents += data
@@ -102,6 +107,21 @@ function getFileContents(req, callback) {
 			callback(contents)
 		}
 	)
+}
+
+// TODO: add more mime types. perhaps move this to another file.
+function getMimeType(filename) {
+    var extensionIndex = filename.indexOf(".");
+    var extension = extensionIndex < 0 ? "" : filename.substr(extensionIndex)
+    
+    switch(extension) {
+        case '.css':
+            return 'text/css'
+        case '.js':
+            return 'text/javascript'
+        default:
+            return 'text/html'
+    }
 }
 
 // Callbacks to handle updating iFrame & getting serialized DOM object
