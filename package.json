@@ -5,7 +5,8 @@
   "main": "server.js",
   "dependencies": {
   	"express": "^4.x",
-  	"dom-serialize": "2.2.1"
+  	"dom-serialize": "2.2.1",
+  	"bower": "1.7.x"
   }
 }
 
