@@ -1,3 +1,5 @@
+const pjson = require('./package')
+
 const electron = require('electron'),
 	app = electron.app,
 	BrowserWindow = electron.BrowserWindow,
@@ -16,12 +18,15 @@ let win
 var mimeType = ''
 var listening = false
 var gRes = null, gReq = null
+var regExp = ''
 
 // Setup for Electron app
 function createWindow() {
 	win = new BrowserWindow({width: 800, height: 600})
 	win.loadURL(`file://${__dirname}/_server_index.html`)
 	win.webContents.openDevTools()
+
+    regExp = new RegExp(pjson['entry-pages'].join("|"),'i')
 
 	win.on('closed', () => {
 		win = null
@@ -53,7 +58,7 @@ ipcMain.on('receiveSerializedDOM', (_, contents) => {
 	gRes.end('<html>' + contents + '</html>')
 })
 
-expressApp.get('/index\.html', (req, res) => {
+expressApp.get(regExp, (req, res) => {
     win.loadURL('file://' + __dirname + req.url)
     gRes = res
     gReq = req
