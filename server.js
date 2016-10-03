@@ -5,7 +5,8 @@ const electron = require('electron'),
 
 const express = require('express'),
 	expressApp = express(),
-	port = 3000
+	port = 3000,
+    path = require('path')
 
 const fs = require('fs'),
 	url = require('url')
@@ -55,9 +56,7 @@ ipcMain.on('receiveSerializedDOM', (_, contents) => {
 	gRes.end(contents)
 })
 
-
-// Server routes
-expressApp.get('*\.html', (req, res) => {
+expressApp.get('/index\.html', (req, res) => {
     console.log("Received req: " + req.url)
     win.loadURL('file://' + __dirname + req.url)
     gRes = res
@@ -69,66 +68,15 @@ expressApp.get('*\.html', (req, res) => {
 })
 
 expressApp.get('*', (req, res) => {
-    console.log("Received req: " + req.url)
-    getFileContents(req, (contents) => {
-        res.writeHead(200, {'Content-Type': mimeType});
-        console.log("Ending req's: " + req.url)
-        res.end(contents)
-        mimeType = ""
-    })
-})
-
-// Server request handlers
-function getFileContents(req, callback) {
     var parsed_url = url.parse(req.url, true)
     var filename = parsed_url.pathname.substr(1)
-    
-    var contents = ''
-    var rstream = fs.createReadStream(filename)
 
-    rstream.on(
-        'readable',
-        () => {
-            var data = rstream.read()
-            mimeType = getMimeType(filename)
 
-            switch(typeof data) {
-                case 'string':
-                    contents += data
-                    break
-                case 'object':
-                    if(data instanceof Buffer) {
-                        contents += data.toString('utf8')
-                    }
-                    break
-                default:
-                    break
-            }
-        }
-    )
-
-    rstream.on(
-        'end',
-        () => {
-            callback(contents)
-        }
-    )
-}
-
-// TODO: add more mime types. perhaps move this to another file.
-function getMimeType(filename) {
-    var extensionIndex = filename.indexOf(".");
-    var extension = extensionIndex < 0 ? "" : filename.substr(extensionIndex)
-    
-    switch(extension) {
-        case '.css':
-            return 'text/css'
-        case '.js':
-            return 'text/javascript'
-        default:
-            return 'text/html'
-    }
-}
+    var p = path.join(__dirname, filename)
+    console.log("pathpathpath")
+    console.log(p)
+    res.sendFile(p)
+})
 
 // Express Server
 function startServer() {
