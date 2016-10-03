@@ -12,9 +12,9 @@ const fs = require('fs'),
 
 let win
 
-var gRes = null
 var mimeType = ''
 var listening = false
+var gRes = null
 
 // Setup for Electron app
 
@@ -37,6 +37,7 @@ app.on('ready', createWindow)
 
 app.on('window-all-closed', () => {
 	if (process.platform !== 'darwin') {
+        stopServer()
 		app.quit()
 	}
 })
@@ -55,23 +56,14 @@ ipcMain.on('receiveSerializedDOM', (_, contents) => {
 
 // Server routes
 expressApp.get('*\.html', (req, res) => {
-    var gRes = res;
-    var gReq = req;
-
-    // stopServer();
-
-    console.log("Received req: " + gReq.url)
-    win.loadURL('file://' + __dirname + gReq.url);
+    console.log("Received req: " + req.url)
+    win.loadURL('file://' + __dirname + req.url);
+    gRes = res;
 
     win.webContents.on('did-finish-load', () => {
+        getDOMInsidePage()
         gRes.end("Hello World")
-        // startServer();
     })
-
- //    gRes = res
-	// getFileContents(req, (contents) => {
-	// 	callbackUpdateIframe(contents, callbackGetDomInsideIframe)
-	// })
 })
 
 
@@ -92,77 +84,13 @@ expressApp.on('listening', () => {
     listening = true
 })
 
-// expressApp.get('*', (req, res) => {
-//     console.log("Received req: " + req.url)
+function getDOMInsidePage() {
+    win.webContents.executeJavaScript(`
+        var ipc = require('electron').ipcRenderer,
+            serialize = require('dom-serialize');
 
-// 	getFileContents(req, (contents) => {
-//         res.writeHead(200, {'Content-Type': mimeType});
-// 		res.end(contents)
-//         mimeType = ""
-// 	})
-// })
-
-// Server request handlers
-// function getFileContents(req, callback) {
-// 	var parsed_url = url.parse(req.url, true)
-// 	var filename = parsed_url.pathname.substr(1)
-	
-// 	var contents = ''
-// 	var rstream = fs.createReadStream(filename)
-
-// 	rstream.on(
-// 		'readable',
-// 		() => {
-// 			var data = rstream.read()
-//             mimeType = getMimeType(filename)
-
-// 			switch(typeof data) {
-// 				case 'string':
-// 					contents += data
-// 					break
-// 				case 'object':
-// 					if(data instanceof Buffer) {
-// 						contents += data.toString('utf8')
-// 					}
-// 					break
-// 				default:
-// 					break
-// 			}
-// 		}
-// 	)
-
-// 	rstream.on(
-// 		'end',
-// 		() => {
-// 			callback(contents)
-// 		}
-// 	)
-// }
-
-// // TODO: add more mime types. perhaps move this to another file.
-// function getMimeType(filename) {
-//     var extensionIndex = filename.indexOf(".");
-//     var extension = extensionIndex < 0 ? "" : filename.substr(extensionIndex)
-    
-//     switch(extension) {
-//         case '.css':
-//             return 'text/css'
-//         case '.js':
-//             return 'text/javascript'
-//         default:
-//             return 'text/html'
-//     }
-// }
-
-// Callbacks to handle updating iFrame & getting serialized DOM object
-// function callbackUpdateIframe(contents, callback) {
-//     win.loadURL("data:text/html;charset=utf-8," + contents);
-// 	// win.webContents.executeJavaScript("updateIframe('" + encodeURI(contents) + "')")
-// 	// callback()
-//     // gRes.end("Ok ladies now let's get in formation")
-// }
-
-// function callbackGetDomInsideIframe() {
-//     // TODO: pass this in as a function
-// 	// win.webContents.executeJavaScript(`getSerializedDOM('')`);
-// }
+        var nodes = document.documentElement.innerHTML;
+        console.log("Hello world")
+        console.log(nodes);
+    `);
+}
