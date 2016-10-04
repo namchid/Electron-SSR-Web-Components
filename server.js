@@ -59,7 +59,6 @@ ipcMain.on('receiveSerializedDOM', (_, contents) => {
 
 // "/index.html|/test.html"
 expressApp.get("/index.html|/test.html", (req, res) => {
-    console.log("HERE: " + req.url)
     win.loadURL('file://' + __dirname + req.url)
     gRes = res
     gReq = req
@@ -81,7 +80,6 @@ expressApp.get('*', (req, res) => {
 // Express Server
 function startServer() {
     if(!listening) {
-        console.log("starting server on port: " + port)
         expressApp.listen(port, () => {
             expressApp.emit('listening', null)
         })
