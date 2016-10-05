@@ -94,12 +94,10 @@ function getDOMInsidePage() {
     win.webContents.executeJavaScript(`
         var ipc = require('electron').ipcRenderer;
         var serializer = require('dom-serialize');
-        var htmlImports = document.getElementsByTagName('link');
-        for (var i = 0; i < htmlImports.length; i++) {
-            if(htmlImports[i].getAttribute('rel') == 'import') {
+        var htmlImports = document.querySelectorAll('link[rel="import"]');
+        for(var i = 0; i < htmlImports.length; i++) {
             htmlImports[i].setAttribute('async', '')
-          }
-        }
+        }   
         ipc.send('receiveSerializedDOM', serializer(document));  
     `);
 }
