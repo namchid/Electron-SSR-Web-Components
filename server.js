@@ -18,7 +18,6 @@ let win
 var mimeType = ''
 var listening = false
 var gRes = null, gReq = null
-var regExp = ''
 
 // Setup for Electron app
 function createWindow() {
@@ -32,7 +31,6 @@ function createWindow() {
 
     // Setup for Express server
     win.webContents.on('dom-ready', () => {
-        regExp = pjson['entry-pages'].join("|")
         startServer();
     })
 }
@@ -57,8 +55,7 @@ ipcMain.on('receiveSerializedDOM', (_, contents) => {
     gRes.end('<html>' + contents + '</html>')
 })
 
-// "/index.html|/test.html"
-expressApp.get("/index.html|/test.html", (req, res) => {
+expressApp.get(pjson['entry-pages'], (req, res) => {
     win.loadURL('file://' + __dirname + req.url)
     gRes = res
     gReq = req
@@ -69,7 +66,6 @@ expressApp.get("/index.html|/test.html", (req, res) => {
 })
 
 expressApp.get('*', (req, res) => {
-    console.log(regExp)
     var parsed_url = url.parse(req.url, true)
     var filename = parsed_url.pathname.substr(1)
 
