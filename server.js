@@ -18,6 +18,7 @@ let win
 var mimeType = ''
 var listening = false
 var gRes = null, gReq = null
+var asyncImports = ''
 
 // Setup for Electron app
 function createWindow() {
@@ -65,7 +66,12 @@ expressApp.get(pjson['entry-pages'], (req, res) => {
     })
 })
 
-expressApp.get('*', (req, res) => {
+expressApp.get('/asyncImports', (req, res) => {
+
+    asyncImports = ''
+})
+
+expressApp.get('/*', (req, res) => {
     var parsed_url = url.parse(req.url, true)
     var filename = parsed_url.pathname.substr(1)
 
@@ -97,7 +103,11 @@ function getDOMInsidePage() {
         var htmlImports = document.querySelectorAll('link[rel="import"]');
         for(var i = 0; i < htmlImports.length; i++) {
             htmlImports[i].setAttribute('async', '')
-        }   
+        }
+        // if more than one html import, replace it by a link to another html import
+        if(htmlImports.length > 1) {
+
+        }  
         ipc.send('receiveSerializedDOM', serializer(document));  
     `);
 }
