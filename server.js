@@ -100,6 +100,6 @@ function getDOMInsidePage() {
             htmlImports[i].setAttribute('async', '')
           }
         }
-        ipc.send('receiveSerializedDOM', response);  
+        ipc.send('receiveSerializedDOM', serializer(document));  
     `);
 }
