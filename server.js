@@ -52,7 +52,7 @@ app.on('activate', function () {
 
 // IPC functions
 ipcMain.on('receiveSerializedDOM', (_, contents) => {
-    gRes.end('<html>' + contents + '</html>')
+    gRes.end(contents)
 })
 
 expressApp.get(pjson['entry-pages'], (req, res) => {
@@ -93,7 +93,7 @@ expressApp.on('listening', () => {
 function getDOMInsidePage() {
     win.webContents.executeJavaScript(`
         var ipc = require('electron').ipcRenderer;
-        var nodes = document.documentElement.innerHTML;
-        ipc.send('receiveSerializedDOM', nodes.toString());  
+        var serializer = require('dom-serialize');
+        ipc.send('receiveSerializedDOM', serializer(document));  
     `);
 }
