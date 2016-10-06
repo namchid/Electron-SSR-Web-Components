@@ -19,6 +19,7 @@ var mimeType = ''
 var listening = false
 var gRes = null, gReq = null
 var asyncFile = 'asyncFile.html'
+var asyncImports = ''
 
 // Setup for Electron app
 function createWindow() {
@@ -56,6 +57,10 @@ ipcMain.on('receiveSerializedDOM', (_, contents) => {
     gRes.end(contents)
 })
 
+ipcMain.on('setAsyncImports', (_, contents) => {
+    asyncImports = contents
+})
+
 expressApp.get(pjson['entry-pages'], (req, res) => {
     win.loadURL('file://' + __dirname + req.url)
     gRes = res
@@ -67,9 +72,8 @@ expressApp.get(pjson['entry-pages'], (req, res) => {
 })
 
 expressApp.get('/asyncFile.html', (req, res) => {
-    var p = path.join(__dirname, asyncFile)
-    res.sendFile(p)
-    // fs.unlinkSync(asyncFile)
+    res.end(asyncImports)
+    asyncImports = ''
 })
 
 expressApp.get('/*', (req, res) => {
@@ -102,36 +106,24 @@ function getDOMInsidePage() {
         var ipc = require('electron').ipcRenderer;
         var serializer = require('dom-serialize');
         var htmlImports = document.querySelectorAll('link[rel="import"]');
-        
-        // if more than one html import, replace it by a link to another html import
+
         if(htmlImports.length > 1) {
-            console.log(htmlImports);
-            console.log(serializer(htmlImports));
+            var asyncFile = 'asyncFile.html'
             var asyncImports = serializer(htmlImports);
 
             for(var i = 0; i < htmlImports.length; i++) {
                 htmlImports[i].parentNode.removeChild(htmlImports[i]);
             }
 
-            // write contents to file
-            var asyncFile = 'asyncFile.html'
-
-            var fs = require('fs');
-            fs.writeFile(asyncFile, asyncImports, (err) => {
-                if(err) {
-                    return console.log(err)
-                }
-                console.log("HEREEEE~~~~~~~~~");
-                document.querySelector('head').innerHTML += 
+            ipc.send('setAsyncImports', asyncImports);
+            document.querySelector('head').innerHTML += 
                 '<link rel="import" href="' + asyncFile + '" async></link>';
-
-                ipc.send('receiveSerializedDOM', serializer(document));  
-            });
+            ipc.send('receiveSerializedDOM', serializer(document));
+        } else if(htmlImports.length > 0) {
+            htmlImports[0].setAttribute('async', '');
+            ipc.send('receiveSerializedDOM', serializer(document));
         } else {
-            for(var i = 0; i < htmlImports.length; i++) {
-                htmlImports[i].setAttribute('async', '');
-            }
-            ipc.send('receiveSerializedDOM', serializer(document));  
-        }  
-    `);
+            ipc.send('receiveSerializedDOM', serializer(document));
+        }
+    `)
 }
