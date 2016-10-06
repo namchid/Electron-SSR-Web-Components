@@ -18,6 +18,8 @@ let win
 var mimeType = ''
 var listening = false
 var gRes = null, gReq = null
+var asyncFile = 'asyncFile.html'
+var asyncImports = ''
 
 // Setup for Electron app
 function createWindow() {
@@ -55,6 +57,10 @@ ipcMain.on('receiveSerializedDOM', (_, contents) => {
     gRes.end(contents)
 })
 
+ipcMain.on('setAsyncImports', (_, contents) => {
+    asyncImports = contents
+})
+
 expressApp.get(pjson['entry-pages'], (req, res) => {
     win.loadURL('file://' + __dirname + req.url)
     gRes = res
@@ -65,7 +71,12 @@ expressApp.get(pjson['entry-pages'], (req, res) => {
     })
 })
 
-expressApp.get('*', (req, res) => {
+expressApp.get('/asyncFile.html', (req, res) => {
+    res.end(asyncImports)
+    asyncImports = ''
+})
+
+expressApp.get('/*', (req, res) => {
     var parsed_url = url.parse(req.url, true)
     var filename = parsed_url.pathname.substr(1)
 
@@ -95,9 +106,24 @@ function getDOMInsidePage() {
         var ipc = require('electron').ipcRenderer;
         var serializer = require('dom-serialize');
         var htmlImports = document.querySelectorAll('link[rel="import"]');
-        for(var i = 0; i < htmlImports.length; i++) {
-            htmlImports[i].setAttribute('async', '')
-        }   
-        ipc.send('receiveSerializedDOM', serializer(document));  
-    `);
+
+        if(htmlImports.length > 1) {
+            var asyncFile = 'asyncFile.html'
+            var asyncImports = serializer(htmlImports);
+
+            for(var i = 0; i < htmlImports.length; i++) {
+                htmlImports[i].parentNode.removeChild(htmlImports[i]);
+            }
+
+            ipc.send('setAsyncImports', asyncImports);
+            document.querySelector('head').innerHTML += 
+                '<link rel="import" href="' + asyncFile + '" async></link>';
+            ipc.send('receiveSerializedDOM', serializer(document));
+        } else if(htmlImports.length > 0) {
+            htmlImports[0].setAttribute('async', '');
+            ipc.send('receiveSerializedDOM', serializer(document));
+        } else {
+            ipc.send('receiveSerializedDOM', serializer(document));
+        }
+    `)
 }

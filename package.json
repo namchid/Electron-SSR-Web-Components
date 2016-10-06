@@ -8,6 +8,6 @@
   	"dom-serialize": "2.2.1",
   	"bower": "1.7.x"
   },
-  "entry-pages": ["/index.html", "/test.html"]
+  "entry-pages": ["/index.html", "/test.html", "/index2.html"]
 }
 
