@@ -21,6 +21,7 @@ electron .
 ```
 Navigate to Browser. Example links:
 ```
-http://localhost:3000/static/templates/static-tests/test.html
-http://localhost:3000/demo/index.html
+http://localhost:3000/index.html
+http://localhost:3000/index2.html
+http://localhost:3000/test.html
 ```
