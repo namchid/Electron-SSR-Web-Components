@@ -107,14 +107,6 @@ function getDOMInsidePage() {
         var serializer = require('dom-serialize');
         var htmlImports = document.querySelectorAll('link[rel="import"]');
 
-        // temporary (?) fix for dom-serialize bug: syntax error for <script> with no attributes
-        // var scripts = document.querySelectorAll('script');
-        // for(var i = 0; i < scripts.length; i++) {
-        //     if(Object.keys(scripts[i]).length < 1) {
-        //         scripts[i].setAttribute('src', '');
-        //     }
-        // }
-
         if(htmlImports.length > 1) {
             var asyncFile = 'asyncFile.html'
             var asyncImports = serializer(htmlImports);
@@ -127,14 +119,11 @@ function getDOMInsidePage() {
             document.querySelector('head').innerHTML += 
                 '<link rel="import" href="' + asyncFile + '" async></link>';
             ipc.send('receiveSerializedDOM', document.documentElement.outerHTML);
-            // ipc.send('receiveSerializedDOM', serializer(document));
         } else if(htmlImports.length > 0) {
             htmlImports[0].setAttribute('async', '');
             ipc.send('receiveSerializedDOM', document.documentElement.outerHTML);
-            // ipc.send('receiveSerializedDOM', serializer(document));
         } else {
             ipc.send('receiveSerializedDOM', document.documentElement.outerHTML);
-            // ipc.send('receiveSerializedDOM', serializer(document));
         }
     `)
 }
