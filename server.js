@@ -108,17 +108,18 @@ function getDOMInsidePage() {
         var htmlImports = document.querySelectorAll('link[rel="import"]');
 
         if(htmlImports.length > 1) {
+            var html = document.cloneNode(true);
             var asyncFile = 'asyncFile.html'
             var asyncImports = serializer(htmlImports);
+            htmlImports = html.querySelectorAll('link[rel="import"]');
 
             for(var i = 0; i < htmlImports.length; i++) {
                 htmlImports[i].parentNode.removeChild(htmlImports[i]);
             }
-
             ipc.send('setAsyncImports', asyncImports);
-            document.querySelector('head').innerHTML += 
+            html.querySelector('head').innerHTML += 
                 '<link rel="import" href="' + asyncFile + '" async></link>';
-            ipc.send('receiveSerializedDOM', document.documentElement.outerHTML);
+            ipc.send('receiveSerializedDOM', html.documentElement.outerHTML);
         } else if(htmlImports.length > 0) {
             htmlImports[0].setAttribute('async', '');
             ipc.send('receiveSerializedDOM', document.documentElement.outerHTML);
