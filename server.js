@@ -112,6 +112,32 @@ function getDOMInsidePage() {
             return node.shadowRoot != null;
         }
 
+        function getInnerString(node) {
+            // is the only case for this a string?
+            // is this case even possible?
+            if(node.tagName == null) {
+                return node;
+            }
+
+            var tag = node.tagName.toLowerCase();
+            var openTag = '<' + tag + '>';
+            var closeTag = '</' + tag + '>';
+
+            if (!hasShadowRoot(node)) {
+                return openTag + node.innerHTML + closeTag;
+            } else {
+                var str = openTag;
+                var shadowChildren = node.shadowRoot.children;
+
+                for(var i = 0; i < shadowChildren.length; i++) {
+                    str += getInnerString(shadowChildren[i]) + '\n';
+                }
+
+                str += closeTag;
+                return str;
+            }
+        }
+
         function nodeIteration(node) {
             if(node === null) return;
 
