@@ -106,10 +106,26 @@ function getDOMInsidePage() {
         var ipc = require('electron').ipcRenderer;
         var serializer = require('dom-serialize');
         var htmlImports = document.querySelectorAll('link[rel="import"]');
+        var domString = '';
 
         function hasShadowRoot(node) {
             return node.shadowRoot != null;
         }
+
+        function nodeIteration(node) {
+            if(node === null) return;
+
+            console.log(node)
+
+            if(node.hasChildNodes()) {
+                nodeIteration(node.firstChild);
+                nodeIteration(node.nextSibling);
+            } else {
+                nodeIteration(node.nextSibling);
+            }
+        }
+
+        // nodeIteration(document)
 
         if(htmlImports.length > 1) {
             var html = document.cloneNode(true);
