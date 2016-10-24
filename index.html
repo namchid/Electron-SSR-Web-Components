@@ -2,6 +2,13 @@
 <html>
   <head>
     <script src="bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+    <script>
+      /* this script must run before Polymer is imported */
+      window.Polymer = {
+        dom: 'shadow',
+        lazyRegister: true
+      };
+    </script>
     <link rel="import" href="icon-toggle-demo.html">
   </head>
   <body>
