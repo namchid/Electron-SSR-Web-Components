@@ -107,6 +107,10 @@ function getDOMInsidePage() {
         var serializer = require('dom-serialize');
         var htmlImports = document.querySelectorAll('link[rel="import"]');
 
+        function hasShadowRoot(node) {
+            return node.shadowRoot != null;
+        }
+
         if(htmlImports.length > 1) {
             var html = document.cloneNode(true);
             var asyncFile = 'asyncFile.html'
