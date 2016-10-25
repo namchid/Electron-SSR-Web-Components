@@ -35,3 +35,5 @@ function parseChildNodes(nodes) {
         }
     }
 }
+
+recurseParseDOM(document.documentElement);
