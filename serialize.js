@@ -1,4 +1,4 @@
-var htmlImports = [];
+// var htmlImports = []; // TODO: add implementation for this
 
 function recurseParseDOM(node) {
     if (node == null) return '';
@@ -25,60 +25,45 @@ function recurseParseDOM(node) {
             attributeString += attributes[i] + '="' + values[i] + '" ';
         }
 
-        openTag = '<' + tag + attributeString + '>';
+        // don't serialize this
+        if(tag === 'link' && node.getAttribute('rel') === 'import') {
+            attributeString += 'async ';
+        }
+
+        openTag = '<' + tag + attributeString.slice(0, -1) + '>';
         closeTag = '</' + tag + '>';
     }
 
     htmlString += openTag;
+
+    // get inner html
+    if(node.childNodes) {
+        htmlString += parseChildNodes(node.childNodes);
+    }
+    if(node.shadowRoot) {
+        htmlString += parseChildNodes(node.shadowRoot.childNodes);
+    }
+
     htmlString += closeTag;
 
     return htmlString;
 }
 
-// function recurseParseDOM(node) {
-//     if(node == null) return '';
+function parseChildNodes(nodes) {
 
-//     var outerHTML = '';
+    var htmlString = '';
 
-//     if(node.outerHTML) {
-//         var outerHTML = node.outerHTML.split('>');
-//         console.log(outerHTML[0] + '>');
-//     }
+    for(var i = 0; i < nodes.length; i++) {
+        var nodeType = nodes[i].nodeType;
 
-//     // var tag = node.tagName;
+        if(nodeType == 3 || nodeType == 8) {
+            htmlString += nodes[i].nodeValue;
+        } else {
+            if(nodes[i].childNodes || nodes[i].shadowRoot) {
+                htmlString += recurseParseDOM(nodes[i]);
+            }
+        }
+    }
 
-//     if(tag) {
-//         var atts = [];
-
-//         console.log('<' + tag + '>');
-//     }
-
-//     // this is the "innerHTML"
-//     if(node.childNodes) {
-//         parseChildNodes(node.childNodes);
-//     } 
-//     if(node.shadowRoot) {
-//         parseChildNodes(node.shadowRoot.childNodes);
-//     }
-
-//     if(outerHTML) {
-//         var tag = node.tagName;
-//         console.log('</' + tag.toLowerCase() + '>');
-//     }
-// }
-
-// function parseChildNodes(nodes) {
-
-//     for(var i = 0; i < nodes.length; i++) {
-//         if(nodes[i].innerHTML) {
-//             console.log(nodes[i].innerHTML);
-//         }
-//         if(nodes[i].shadowRoot) {
-//             recurseParseDOM(nodes[i]);
-//         } else if(nodes[i].childNodes) {
-//             recurseParseDOM(nodes[i]);
-//         }
-//     }
-// }
-
-// recurseParseDOM(document.documentElement);
+    return htmlString;
+}
