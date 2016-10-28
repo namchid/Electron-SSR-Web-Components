@@ -106,7 +106,8 @@ function getDOMInsidePage() {
         var ipc = require('electron').ipcRenderer;
         var serializer = require('dom-serialize');
         var htmlImports = document.querySelectorAll('link[rel="import"]');
-
+        document.querySelector("body").removeAttribute("unresolved");
+        
         if(htmlImports.length > 1) {
             var html = document.cloneNode(true);
             var asyncFile = 'asyncFile.html'
