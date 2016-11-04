@@ -113,7 +113,6 @@ expressApp.on('listening', () => {
 function getDOMInsidePage() {
   win.webContents.executeJavaScript(`
     var ipcRenderer = require('electron').ipcRenderer;
-    var serializer = require('dom-serialize');
     var asyncImports = '';
 
     var htmlImports = document.querySelectorAll('link[rel="import"]');
