@@ -1,25 +1,23 @@
 const pjson = require('./package')
 
 const electron = require('electron'),
-app = electron.app,
-BrowserWindow = electron.BrowserWindow,
-ipcMain = electron.ipcMain
+  app = electron.app,
+  BrowserWindow = electron.BrowserWindow,
+  ipcMain = electron.ipcMain
 
-const express = require('express'),
-expressApp = express(),
-port = 3000,
-path = require('path')
+const shadowServer = require('express')(),
+  shadowPort = 3000,
+  path = require('path')
 
 const fs = require('fs'),
 url = require('url')
 
 let win
 
-var mimeType = ''
-var listening = false
-var gRes = null, gReq = null
-var asyncImports = ''
-var shadowStyles = ''
+var listening = false,
+  gRes = null,
+  gReq = null,
+  asyncImports = ''
 
 // Setup for Electron app
 function createWindow() {
@@ -65,7 +63,7 @@ ipcMain.on('setShadowStyles', (_, contents) => {
   shadowStyles = contents
 })
 
-expressApp.get(pjson['entry-pages'], (req, res) => {
+shadowServer.get(pjson['entry-pages'], (req, res) => {
   win.loadURL('file://' + __dirname + req.url)
   gRes = res
   gReq = req
@@ -75,17 +73,12 @@ expressApp.get(pjson['entry-pages'], (req, res) => {
   })
 })
 
-expressApp.get('/asyncFile.html', (req, res) => {
+shadowServer.get('/asyncFile.html', (req, res) => {
   res.end(asyncImports)
-  // asyncImports = ''
+  asyncImports = ''
 })
 
-expressApp.get('/shadowStyles.html', (req, res) => {
-  res.end(shadowStyles)
-  // asyncImports = ''
-})
-
-expressApp.get('/*', (req, res) => {
+shadowServer.get('/*', (req, res) => {
   var parsed_url = url.parse(req.url, true)
   var filename = parsed_url.pathname.substr(1)
 
@@ -96,17 +89,17 @@ expressApp.get('/*', (req, res) => {
 // Express Server
 function startServer() {
   if(!listening) {
-    expressApp.listen(port, () => {
-      expressApp.emit('listening', null)
+    shadowServer.listen(shadowPort, () => {
+      shadowServer.emit('listening', null)
     })
   }
 }
 
 function stopServer() {
-  expressApp.close()
+  shadowServer.close()
 }
 
-expressApp.on('listening', () => {
+shadowServer.on('listening', () => {
   listening = true
 })
 
@@ -116,7 +109,7 @@ function getDOMInsidePage() {
     var ipcRenderer = require('electron').ipcRenderer;
     var importsString = '';
     var removedImports = new Set();
-  `);
+    `);
 
   /** Taken from Kevin's WC-SSR (link in README)**/
   win.webContents.executeJavaScript(`
@@ -126,7 +119,7 @@ function getDOMInsidePage() {
 
     var shadowStyleList = [];
     var shadowStyleMap = {};
-  `);
+    `);
 
   /** Taken from Kevin's WC-SSR (link in README)**/
   win.webContents.executeJavaScript(`
@@ -136,7 +129,7 @@ function getDOMInsidePage() {
         el.remove();
       });
     }
-  `);
+    `);
 
   /** Modified from Kevin's WC-SSR (link in README)**/
   win.webContents.executeJavaScript(`
@@ -151,7 +144,7 @@ function getDOMInsidePage() {
         el.remove();
       });
     }
-  `);
+    `);
 
   /** Taken from Kevin's WC-SSR (link in README)**/
   win.webContents.executeJavaScript(`
@@ -171,7 +164,7 @@ function getDOMInsidePage() {
         el.parentNode.replaceChild(shadowStyle, el);
       });
     }
-  `);
+    `);
 
   /** Taken from Kevin's WC-SSR (link in README)**/
   win.webContents.executeJavaScript(`
@@ -187,19 +180,19 @@ function getDOMInsidePage() {
         clonedEl.insertBefore(shadowRoot, clonedEl.firstChild);
       }
     }
-  `);
+    `);
 
   /** Taken from Kevin's WC-SSR (link in README)**/
   win.webContents.executeJavaScript(`
-      function replaceShadowRoots(container, clonedContainer) {
-        var elements = container.querySelectorAll('*');
-        var clonedElements = clonedContainer.querySelectorAll('*');
-        [].slice.call(elements).forEach(function(el, i) {
-          replaceShadowRoot(el, clonedElements[i]);
-        });
-        return clonedContainer;
-      }
-  `);
+    function replaceShadowRoots(container, clonedContainer) {
+      var elements = container.querySelectorAll('*');
+      var clonedElements = clonedContainer.querySelectorAll('*');
+      [].slice.call(elements).forEach(function(el, i) {
+        replaceShadowRoot(el, clonedElements[i]);
+      });
+      return clonedContainer;
+    }
+    `);
   
   /** Taken from Kevin's WC-SSR (link in README)**/
   win.webContents.executeJavaScript(`
@@ -211,7 +204,7 @@ function getDOMInsidePage() {
       });
       doc.querySelector('head').appendChild(template);
     }
-  `);
+    `);
 
   /** Taken from Kevin's WC-SSR (link in README)**/
   win.webContents.executeJavaScript(`
@@ -236,7 +229,7 @@ function getDOMInsidePage() {
       };
       document.registerElement('shadow-root', {prototype: proto});
     }
-  `);
+    `);
 
   win.webContents.executeJavaScript(`
     function insertPolymerShadowDom() {
@@ -250,7 +243,7 @@ function getDOMInsidePage() {
       script.textContent = 'window.Polymer = {dom: "shadow", lazyRegister: true}';
       head.insertBefore(script, head.firstChild.nextSibling);
     }
-  `);
+    `);
 
   win.webContents.executeJavaScript(`
     function insertImportLink() {
@@ -261,7 +254,7 @@ function getDOMInsidePage() {
       var head = document.querySelector('head');
       head.appendChild(linkNode);
     }
-  `);
+    `);
 
   win.webContents.executeJavaScript(`
     function registerAndReinsert() {
@@ -269,7 +262,7 @@ function getDOMInsidePage() {
       registerShadowRoot();
       insertImportLink();
     }
-  `);
+    `);
 
   win.webContents.executeJavaScript(`
     function insertScriptsAndImports(clonedDoc) {
@@ -282,7 +275,7 @@ function getDOMInsidePage() {
 
       clonedDoc.querySelector('head').appendChild(scripts);
     }
-  `);
+    `);
 
   /** Modified from Kevin's WC-SSR (link in README)**/
   win.webContents.executeJavaScript(`
@@ -292,11 +285,13 @@ function getDOMInsidePage() {
 
     replaceShadowRoots(doc, clonedDoc);
     removeImports(clonedDoc);
-    ipcRenderer.send('setAsyncImports', importsString);
+    if(importsString != '') {
+      ipcRenderer.send('setAsyncImports', importsString);
+    }
     removeScripts(clonedDoc);
     insertShadowStyles(clonedDoc, shadowStyleList);
     insertScriptsAndImports(clonedDoc);
 
     ipcRenderer.send('receiveSerializedDOM', clonedDoc.outerHTML);
-  `);
+    `);
 }
