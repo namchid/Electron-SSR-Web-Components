@@ -17,9 +17,10 @@ url = require('url')
 let win
 
 var listening = false,
-  gRes = null,
-  gReq = null,
-  asyncImports = ''
+  shadyRes = null,
+  shadowRes = null,
+  shadyAsyncImports = '',
+  shadowAsyncImports = ''
 
 // Setup for Electron app
 function createWindow() {
@@ -53,40 +54,57 @@ app.on('activate', function () {
 })
 
 // IPC functions
-ipcMain.on('receiveSerializedDOM', (_, contents) => {
-  gRes.end(contents)
+ipcMain.on('receiveSerializedDOM', (_, contents, isShady) => {
+  if(isShady) {
+    shadyRes.end(contents)
+  } else {
+    shadowRes.end(contents)
+  }
 })
 
-ipcMain.on('setAsyncImports', (_, contents) => {
-  asyncImports = contents
+ipcMain.on('setShadyAsyncImports', (_, contents) => {
+  shadyAsyncImports = contents
+})
+
+ipcMain.on('setShadowAsyncImports', (_, contents) => {
+  shadowAsyncImports = contents
 })
 
 ipcMain.on('setShadowStyles', (_, contents) => {
   shadowStyles = contents
 })
 
-shadowServer.get(pjson['entry-pages'], (req, res) => {
+shadyServer.get(pjson['entry-pages'], (req, res) => {
   win.loadURL('file://' + __dirname + req.url)
-  gRes = res
-  gReq = req
+  shadyRes = res
 
   win.webContents.on('did-finish-load', () => {
-    getDOMInsidePage()
+    shadyGetDOMInsidePage()
   })
 })
 
-shadowServer.get('/asyncFile.html', (req, res) => {
-  res.end(asyncImports)
-  asyncImports = ''
+shadowServer.get(pjson['entry-pages'], (req, res) => {
+  win.loadURL('file://' + __dirname + req.url)
+  shadowRes = res
+
+  win.webContents.on('did-finish-load', () => {
+    shadowGetDOMInsidePage()
+  })
 })
 
-shadowServer.get('/*', (req, res) => {
-  var parsed_url = url.parse(req.url, true)
-  var filename = parsed_url.pathname.substr(1)
-
-  var p = path.join(__dirname, filename)
-  res.sendFile(p)
+shadyServer.get('/_shadyAsyncFile.html', (req, res) => {
+  res.end(shadyAsyncImports)
+  shadyAsyncImports = ''
 })
+
+shadowServer.get('/_shadowAsyncFile.html', (req, res) => {
+  res.end(shadowAsyncImports)
+  shadowAsyncImports = ''
+})
+
+shadyServer.get('/*', returnRequest)
+
+shadowServer.get('/*', returnRequest)
 
 // Express Server
 function startServer() {
@@ -104,11 +122,50 @@ function stopServer() {
   shadowServer.close()
 }
 
+function returnRequest(req, res) {
+  var parsed_url = url.parse(req.url, true)
+  var filename = parsed_url.pathname.substr(1)
+
+  var p = path.join(__dirname, filename)
+  res.sendFile(p)
+}
+
 shadowServer.on('listening', () => {
   listening = true
 })
 
-function getDOMInsidePage() {
+function shadyGetDOMInsidePage() {
+  win.webContents.executeJavaScript(`
+    var ipcRenderer = require('electron').ipcRenderer;
+    var asyncImports = '';
+
+    var htmlImports = document.querySelectorAll('link[rel="import"]');
+
+    if(htmlImports.length > 0) {
+      var html = document.cloneNode(true);
+      html.querySelector('body').removeAttribute('unresolved');
+
+      var imports = html.querySelectorAll('link[rel="import"]');
+      imports.forEach((linkNode) => {
+        asyncImports += linkNode.outerHTML;
+        linkNode.parentNode.removeChild(linkNode);
+      });
+      ipcRenderer.send('setShadyAsyncImports', asyncImports);
+
+      var newImport = html.createElement('link');
+      newImport.setAttribute('rel', 'import');
+      newImport.setAttribute('href', '_shadyAsyncFile.html');
+      newImport.setAttribute('async', '');
+      html.querySelector('head').appendChild(newImport);
+
+      ipcRenderer.send('receiveSerializedDOM', html.documentElement.outerHTML, true);
+    } else {
+      ipcRenderer.send('receiveSerializedDOM', document.documentElement.outerHTML, true);
+    }
+  `);
+}
+
+function shadowGetDOMInsidePage() {
 
   win.webContents.executeJavaScript(`
     var ipcRenderer = require('electron').ipcRenderer;
@@ -254,7 +311,7 @@ function getDOMInsidePage() {
     function insertImportLink() {
       var linkNode = document.createElement('link');
       linkNode.setAttribute('rel', 'import');
-      linkNode.setAttribute('href', 'asyncFile.html');
+      linkNode.setAttribute('href', '_shadowAsyncFile.html');
       linkNode.setAttribute('async', '');
       var head = document.querySelector('head');
       head.appendChild(linkNode);
@@ -291,12 +348,12 @@ function getDOMInsidePage() {
     replaceShadowRoots(doc, clonedDoc);
     removeImports(clonedDoc);
     if(importsString != '') {
-      ipcRenderer.send('setAsyncImports', importsString);
+      ipcRenderer.send('setShadyAsyncImports', importsString);
     }
     removeScripts(clonedDoc);
     insertShadowStyles(clonedDoc, shadowStyleList);
     insertScriptsAndImports(clonedDoc);
 
-    ipcRenderer.send('receiveSerializedDOM', clonedDoc.outerHTML);
+    ipcRenderer.send('receiveSerializedDOM', clonedDoc.outerHTML, false);
     `);
 }
