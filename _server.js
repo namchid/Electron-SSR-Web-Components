@@ -5,8 +5,10 @@ const electron = require('electron'),
   BrowserWindow = electron.BrowserWindow,
   ipcMain = electron.ipcMain
 
-const shadowServer = require('express')(),
-  shadowPort = 3000,
+const shadyServer = require('express')(),
+  shadowServer = require('express')(),
+  shadyPort = 3000,
+  shadowPort = 4000,
   path = require('path')
 
 const fs = require('fs'),
@@ -89,6 +91,8 @@ shadowServer.get('/*', (req, res) => {
 // Express Server
 function startServer() {
   if(!listening) {
+    shadyServer.listen(shadyPort)
+
     shadowServer.listen(shadowPort, () => {
       shadowServer.emit('listening', null)
     })
@@ -96,6 +100,7 @@ function startServer() {
 }
 
 function stopServer() {
+  shadyServer.close()
   shadowServer.close()
 }
 
