@@ -4,9 +4,9 @@
   "version": "0.1.0",
   "main": "_server.js",
   "dependencies": {
-  	"express": "^4.x",
-  	"dom-serialize": "2.2.1",
-  	"bower": "1.7.x"
+    "express": "^4.x",
+    "dom-serialize": "2.2.1",
+    "bower": "1.7.x"
   },
   "entry-pages": ["/index.html", "/test.html", "/index2.html", "/shadowroot.html", "/index3.html"]
 }

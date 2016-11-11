@@ -2,6 +2,13 @@
 
 Uses [Electron] to render on the server.
 
+## Note
+
+Port 3000: Shady DOM
+Port 4000: Shadow DOM
+
+The Shadow DOM version (runs on port 4000) is for web components that use Shadow DOM. It is adapted from Kevin's [WC-SSR]
+
 ## Setup
 Install [Node.js] and npm
 
@@ -36,3 +43,4 @@ http://localhost:3000/test.html
 
 [Electron]: <https://github.com/electron/electron>
 [Node.js]: <https://docs.npmjs.com/getting-started/installing-node#installing-nodejs>
+[WC-SSR]: <https://github.com/kevinpschaaf/wc-ssr>
