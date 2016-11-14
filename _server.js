@@ -9,7 +9,8 @@ const shadyServer = require('express')(),
   shadowServer = require('express')(),
   shadyPort = 3000,
   shadowPort = 4000,
-  path = require('path')
+  path = require('path'),
+  ngrok = require('ngrok')
 
 const fs = require('fs'),
 url = require('url')
@@ -74,7 +75,7 @@ ipcMain.on('setShadowStyles', (_, contents) => {
   shadowStyles = contents
 })
 
-shadyServer.get(pjson['entry-pages'], (req, res) => {
+shadyServer.get(pjson['shady-entry-pages'], (req, res) => {
   win.loadURL('file://' + __dirname + req.url)
   shadyRes = res
 
@@ -83,7 +84,7 @@ shadyServer.get(pjson['entry-pages'], (req, res) => {
   })
 })
 
-shadowServer.get(pjson['entry-pages'], (req, res) => {
+shadowServer.get(pjson['shadow-entry-pages'], (req, res) => {
   win.loadURL('file://' + __dirname + req.url)
   shadowRes = res
 
@@ -114,6 +115,10 @@ function startServer() {
     shadowServer.listen(shadowPort, () => {
       shadowServer.emit('listening', null)
     })
+
+    ngrok.connect(shadyPort, (err, url) => { console.log('Shady ngrok url: ' + url) })
+    ngrok.connect(shadowPort, (err, url) => { console.log('Shadow ngrok url: ' + url) })
+
   }
 }
 

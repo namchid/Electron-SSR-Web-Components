@@ -6,7 +6,9 @@
   "dependencies": {
     "express": "^4.x",
     "dom-serialize": "2.2.1",
-    "bower": "1.7.x"
+    "bower": "1.7.x",
+    "ngrok": "2.x"
   },
-  "entry-pages": ["/index.html", "/test.html", "/index2.html", "/shadowroot.html", "/index3.html"]
+  "shady-entry-pages": ["/index.html", "/index2.html", "/index3.html", "/shadowroot.html"],
+  "shadow-entry-pages": ["/indexshadow.html", "/index2shadow.html", "/index3shadow.html", "/shadowroot.html"]
 }
