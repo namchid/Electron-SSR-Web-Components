@@ -71,10 +71,6 @@ ipcMain.on('setShadowAsyncImports', (_, contents) => {
   shadowAsyncImports = contents
 })
 
-ipcMain.on('setShadowStyles', (_, contents) => {
-  shadowStyles = contents
-})
-
 shadyServer.get(pjson['shady-entry-pages'], (req, res) => {
   win.loadURL('file://' + __dirname + req.url)
   shadyRes = res
@@ -353,7 +349,7 @@ function shadowGetDOMInsidePage() {
     replaceShadowRoots(doc, clonedDoc);
     removeImports(clonedDoc);
     if(importsString != '') {
-      ipcRenderer.send('setShadyAsyncImports', importsString);
+      ipcRenderer.send('setShadowAsyncImports', importsString);
     }
     removeScripts(clonedDoc);
     insertShadowStyles(clonedDoc, shadowStyleList);
