@@ -13,13 +13,17 @@ const shadyServer = require('express')(),
   ngrok = require('ngrok')
 
 const fs = require('fs'),
-url = require('url')
+  url = require('url')
+
+var cache = {}
 
 let win
 
 var listening = false,
   shadyRes = null,
   shadowRes = null,
+  shadyReq = null,
+  shadowReq = null,
   shadyAsyncImports = '',
   shadowAsyncImports = ''
 
@@ -71,9 +75,39 @@ ipcMain.on('setShadowAsyncImports', (_, contents) => {
   shadowAsyncImports = contents
 })
 
+// TODO
+ipcMain.on('checkCache', (event, isShady, rawDOM) => {
+  var name = isShady ? shadyReq.url : shadowReq.url
+  console.log('name: ' + name)
+
+  if(cache[name]) {
+    if(cache[name]['rawDOM'] == rawDOM) {
+      event.sender.send('receiveCacheCheckStatus', 1);
+    } else {
+      event.sender.send('receiveCacheCheckStatus', 0);
+    }
+  } else {
+    event.sender.send('receiveCacheCheckStatus', -1);
+  }
+})
+
+ipcMain.on('updateCache', (event, isShady, rawDOM, cachedResult) => {
+  var name = isShady ? shadyReq.url : shadowReq.url
+  console.log('updating for: ' + name)
+
+  cache[name] = {}
+  cache[name].rawDOM = rawDOM
+  cache[name].cachedResult = cachedResult
+
+  // console.log(cache)
+  event.sender.send('cacheFinishedUpdating', true);
+})
+
+// Server functions
 shadyServer.get(pjson['shady-entry-pages'], (req, res) => {
   win.loadURL('file://' + __dirname + req.url)
   shadyRes = res
+  shadyReq = req
 
   win.webContents.on('did-finish-load', () => {
     shadyGetDOMInsidePage()
@@ -83,6 +117,7 @@ shadyServer.get(pjson['shady-entry-pages'], (req, res) => {
 shadowServer.get(pjson['shadow-entry-pages'], (req, res) => {
   win.loadURL('file://' + __dirname + req.url)
   shadowRes = res
+  shadowReq = req
 
   win.webContents.on('did-finish-load', () => {
     shadowGetDOMInsidePage()
@@ -136,34 +171,63 @@ shadowServer.on('listening', () => {
 })
 
 function shadyGetDOMInsidePage() {
+  //TODO
   win.webContents.executeJavaScript(`
     var ipcRenderer = require('electron').ipcRenderer;
+
+    ipcRenderer.on('receiveCacheCheckStatus', (_, cacheCheckStatus) => {
+      console.log(cacheCheckStatus);
+
+      switch(cacheCheckStatus) {
+        case 1:
+          console.log("need to update this");
+          break;
+        default:
+          getDOMResponse();
+          break;
+      }
+    });
+
+    ipcRenderer.on('cacheFinishedUpdating', (_) => {
+      ipcRenderer.send('receiveSerializedDOM', cachedResult, true);
+    });
+
+    ipcRenderer.send('checkCache', true, document.outerHTML);
+    `);
+
+  win.webContents.executeJavaScript(`
     var asyncImports = '';
-
     var htmlImports = document.querySelectorAll('link[rel="import"]');
+    var rawDOM = document.documentElement.outerHTML;
+    var cachedResult = '';
 
-    if(htmlImports.length > 0) {
-      var html = document.cloneNode(true);
-      html.querySelector('body').removeAttribute('unresolved');
+    function getDOMResponse() {
+      if(htmlImports.length > 0) {
+        var html = document.cloneNode(true);
+        html.querySelector('body').removeAttribute('unresolved');
 
-      var imports = html.querySelectorAll('link[rel="import"]');
-      imports.forEach((linkNode) => {
-        asyncImports += linkNode.outerHTML;
-        linkNode.parentNode.removeChild(linkNode);
-      });
-      ipcRenderer.send('setShadyAsyncImports', asyncImports);
+        var imports = html.querySelectorAll('link[rel="import"]');
+        imports.forEach((linkNode) => {
+          asyncImports += linkNode.outerHTML;
+          linkNode.parentNode.removeChild(linkNode);
+        });
+        ipcRenderer.send('setShadyAsyncImports', asyncImports);
 
-      var newImport = html.createElement('link');
-      newImport.setAttribute('rel', 'import');
-      newImport.setAttribute('href', '_shadyAsyncFile.html');
-      newImport.setAttribute('async', '');
-      html.querySelector('head').appendChild(newImport);
+        var newImport = html.createElement('link');
+        newImport.setAttribute('rel', 'import');
+        newImport.setAttribute('href', '_shadyAsyncFile.html');
+        newImport.setAttribute('async', '');
+        html.querySelector('head').appendChild(newImport);
 
-      ipcRenderer.send('receiveSerializedDOM', html.documentElement.outerHTML, true);
-    } else {
-      ipcRenderer.send('receiveSerializedDOM', document.documentElement.outerHTML, true);
+        cachedResult = html.documentElement.outerHTML;
+        ipcRenderer.send('updateCache', true, rawDOM, cachedResult);
+      } else {
+        cachedResult = rawDOM;
+        ipcRenderer.send('updateCache', true, rawDOM, cachedResult);
+      }
     }
-  `);
+    `);
+
 }
 
 function shadowGetDOMInsidePage() {
@@ -182,6 +246,28 @@ function shadowGetDOMInsidePage() {
 
     var shadowStyleList = [];
     var shadowStyleMap = {};
+    `);
+
+  // TODO
+  win.webContents.executeJavaScript(`
+    ipcRenderer.on('receiveCacheCheckStatus', (_, cacheCheckStatus) => {
+      console.log(cacheCheckStatus);
+
+      switch(cacheCheckStatus) {
+        case 1:
+          console.log("need to update this");
+          break;
+        default:
+          getDOMResponse();
+          break;
+      }
+    });
+
+    ipcRenderer.on('cacheFinishedUpdating', (_) => {
+      ipcRenderer.send('receiveSerializedDOM', cachedResult, false);
+    });
+
+    ipcRenderer.send('checkCache', false, document.documentElement.outerHTML);
     `);
 
   /** Taken from Kevin's WC-SSR (link in README)**/
@@ -342,19 +428,25 @@ function shadowGetDOMInsidePage() {
 
   /** Modified from Kevin's WC-SSR (link in README)**/
   win.webContents.executeJavaScript(`
-    var doc = document.documentElement;
-    var clonedDoc = doc.cloneNode(true);
-    clonedDoc.querySelector('body').removeAttribute('unresolved');
+    var cachedResult = '';
 
-    replaceShadowRoots(doc, clonedDoc);
-    removeImports(clonedDoc);
-    if(importsString != '') {
-      ipcRenderer.send('setShadowAsyncImports', importsString);
+    function getDOMResponse() {
+      var doc = document.documentElement;
+      var clonedDoc = doc.cloneNode(true);
+      clonedDoc.querySelector('body').removeAttribute('unresolved');
+
+      replaceShadowRoots(doc, clonedDoc);
+      removeImports(clonedDoc);
+      if(importsString != '') {
+        ipcRenderer.send('setShadowAsyncImports', importsString);
+      }
+      removeScripts(clonedDoc);
+      insertShadowStyles(clonedDoc, shadowStyleList);
+      insertScriptsAndImports(clonedDoc);
+
+      var rawDOM = doc.outerHTML;
+      cachedResult = clonedDoc.outerHTML;
+      ipcRenderer.send('updateCache', false, rawDOM, cachedResult);
     }
-    removeScripts(clonedDoc);
-    insertShadowStyles(clonedDoc, shadowStyleList);
-    insertScriptsAndImports(clonedDoc);
-
-    ipcRenderer.send('receiveSerializedDOM', clonedDoc.outerHTML, false);
     `);
 }
