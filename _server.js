@@ -13,7 +13,7 @@ const shadyServer = require('express')(),
   ngrok = require('ngrok')
 
 const fs = require('fs'),
-url = require('url')
+  url = require('url')
 
 let win
 
@@ -168,13 +168,7 @@ function shadyGetDOMInsidePage() {
 
 function shadowGetDOMInsidePage() {
 
-  win.webContents.executeJavaScript(`
-    var ipcRenderer = require('electron').ipcRenderer;
-    var importsString = '';
-    var removedImports = new Set();
-    `);
-
-  /** Taken from Kevin's WC-SSR (link in README)**/
+  /** Modified from Kevin's WC-SSR (link in README)**/
   win.webContents.executeJavaScript(`
     var ipcRenderer = require('electron').ipcRenderer;
     var importsString = '';
