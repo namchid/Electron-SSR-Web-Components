@@ -1,31 +1,31 @@
 const pjson = require('./package')
 
 const electron = require('electron'),
-  app = electron.app,
-  BrowserWindow = electron.BrowserWindow,
-  ipcMain = electron.ipcMain
+app = electron.app,
+BrowserWindow = electron.BrowserWindow,
+ipcMain = electron.ipcMain
 
 const shadyServer = require('express')(),
-  shadowServer = require('express')(),
-  shadyPort = 3000,
-  shadowPort = 4000,
-  path = require('path'),
-  ngrok = require('ngrok')
+shadowServer = require('express')(),
+shadyPort = 3000,
+shadowPort = 4000,
+path = require('path'),
+ngrok = require('ngrok')
 
 const fs = require('fs'),
-  url = require('url')
-
-var cache = {}
+url = require('url')
 
 let win
 
 var listening = false,
-  shadyRes = null,
-  shadowRes = null,
-  shadyReq = null,
-  shadowReq = null,
-  shadyAsyncImports = '',
-  shadowAsyncImports = ''
+shadyRes = null,
+shadowRes = null,
+shadyReq = null,
+shadowReq = null,
+shadyAsyncImports = '',
+shadowAsyncImports = ''
+
+var cache = {}
 
 // Setup for Electron app
 function createWindow() {
@@ -60,6 +60,7 @@ app.on('activate', function () {
 
 // IPC functions
 ipcMain.on('receiveSerializedDOM', (_, contents, isShady) => {
+  console.log('done -- received serialized dom')
   if(isShady) {
     shadyRes.end(contents)
   } else {
@@ -75,36 +76,48 @@ ipcMain.on('setShadowAsyncImports', (_, contents) => {
   shadowAsyncImports = contents
 })
 
-// TODO
 ipcMain.on('checkCache', (event, isShady, rawDOM) => {
   var name = isShady ? shadyReq.url : shadowReq.url
-  console.log('name: ' + name)
+  console.log('checking cache for: ' + name)
 
   if(cache[name]) {
-    if(cache[name]['rawDOM'] == rawDOM) {
-      event.sender.send('receiveCacheCheckStatus', 1);
+    if(cache[name].rawDOM == rawDOM) {
+      event.returnValue = 1
     } else {
-      event.sender.send('receiveCacheCheckStatus', 0);
+      console.log('~~~~~dom different')
+      event.returnValue = 0
     }
   } else {
-    event.sender.send('receiveCacheCheckStatus', -1);
+    event.returnValue = -1
   }
 })
 
-ipcMain.on('updateCache', (event, isShady, rawDOM, cachedResult) => {
+ipcMain.on('updateCache', (event, isShady, rawDOM, cachedResponse, htmlImports) => {
   var name = isShady ? shadyReq.url : shadowReq.url
-  console.log('updating for: ' + name)
+  console.log('updating cache for: ' + name)
 
-  cache[name] = {}
-  cache[name].rawDOM = rawDOM
-  cache[name].cachedResult = cachedResult
-
-  // console.log(cache)
-  event.sender.send('cacheFinishedUpdating', true);
+  cache[name] = {'rawDOM': rawDOM, 'cachedResponse': cachedResponse, 'htmlImports': htmlImports}
+  // console.log(cache[name].rawDOM)
+  event.returnValue = true
 })
 
-// Server functions
+ipcMain.on('getCache', (event, isShady) => {
+  var name = isShady ? shadyReq.url : shadowReq.url
+  console.log('getting cache for: ' + name)
+
+  event.returnValue = cache[name]['cachedResponse']
+})
+
+ipcMain.on('getHtmlImports', (event, isShady) => {
+  var name = isShady ? shadyReq.url : shadowReq.url
+  console.log('getting html imports for: ' + name)
+
+  event.returnValue = cache[name]['htmlImports']
+})
+
 shadyServer.get(pjson['shady-entry-pages'], (req, res) => {
+  console.log('---------------\nreceived request: ' + req.url)
+
   win.loadURL('file://' + __dirname + req.url)
   shadyRes = res
   shadyReq = req
@@ -171,37 +184,20 @@ shadowServer.on('listening', () => {
 })
 
 function shadyGetDOMInsidePage() {
-  //TODO
   win.webContents.executeJavaScript(`
     var ipcRenderer = require('electron').ipcRenderer;
+    var rawDOM = document.documentElement.outerHTML;
 
-    ipcRenderer.on('receiveCacheCheckStatus', (_, cacheCheckStatus) => {
-      console.log(cacheCheckStatus);
-
-      switch(cacheCheckStatus) {
-        case 1:
-          console.log("need to update this");
-          break;
-        default:
-          getDOMResponse();
-          break;
-      }
-    });
-
-    ipcRenderer.on('cacheFinishedUpdating', (_) => {
-      ipcRenderer.send('receiveSerializedDOM', cachedResult, true);
-    });
-
-    ipcRenderer.send('checkCache', true, document.outerHTML);
+    var cacheCheck = ipcRenderer.sendSync('checkCache', true, rawDOM);
+    console.log('cache check: ' + cacheCheck);
     `);
 
   win.webContents.executeJavaScript(`
-    var asyncImports = '';
-    var htmlImports = document.querySelectorAll('link[rel="import"]');
-    var rawDOM = document.documentElement.outerHTML;
-    var cachedResult = '';
+    function cacheWork() {
+      var asyncImports = '';
 
-    function getDOMResponse() {
+      var htmlImports = document.querySelectorAll('link[rel="import"]');
+
       if(htmlImports.length > 0) {
         var html = document.cloneNode(true);
         html.querySelector('body').removeAttribute('unresolved');
@@ -219,15 +215,30 @@ function shadyGetDOMInsidePage() {
         newImport.setAttribute('async', '');
         html.querySelector('head').appendChild(newImport);
 
-        cachedResult = html.documentElement.outerHTML;
-        ipcRenderer.send('updateCache', true, rawDOM, cachedResult);
+        var result = html.documentElement.outerHTML;
+        var updatedCacheCheck = ipcRenderer.sendSync('updateCache', true, rawDOM, result, asyncImports);
+        console.log(updatedCacheCheck);
+        ipcRenderer.send('receiveSerializedDOM', result, true);
       } else {
-        cachedResult = rawDOM;
-        ipcRenderer.send('updateCache', true, rawDOM, cachedResult);
+        var updatedCacheCheck = ipcRenderer.sendSync('updateCache', true, rawDOM, rawDOM, '');
+        ipcRenderer.send('receiveSerializedDOM', rawDOM, true);
       }
     }
     `);
 
+  win.webContents.executeJavaScript(`
+    switch(cacheCheck) {
+      case 1:
+        var cachedResponse = ipcRenderer.sendSync('getCache', true);
+        var htmlImports = ipcRenderer.sendSync('getHtmlImports', true);
+        ipcRenderer.send('setShadyAsyncImports', htmlImports);
+        ipcRenderer.send('receiveSerializedDOM', cachedResponse, true);
+        break;
+      default:
+        cacheWork();
+        break;
+    }
+    `);
 }
 
 function shadowGetDOMInsidePage() {
@@ -246,28 +257,6 @@ function shadowGetDOMInsidePage() {
 
     var shadowStyleList = [];
     var shadowStyleMap = {};
-    `);
-
-  // TODO
-  win.webContents.executeJavaScript(`
-    ipcRenderer.on('receiveCacheCheckStatus', (_, cacheCheckStatus) => {
-      console.log(cacheCheckStatus);
-
-      switch(cacheCheckStatus) {
-        case 1:
-          console.log("need to update this");
-          break;
-        default:
-          getDOMResponse();
-          break;
-      }
-    });
-
-    ipcRenderer.on('cacheFinishedUpdating', (_) => {
-      ipcRenderer.send('receiveSerializedDOM', cachedResult, false);
-    });
-
-    ipcRenderer.send('checkCache', false, document.documentElement.outerHTML);
     `);
 
   /** Taken from Kevin's WC-SSR (link in README)**/
@@ -428,25 +417,19 @@ function shadowGetDOMInsidePage() {
 
   /** Modified from Kevin's WC-SSR (link in README)**/
   win.webContents.executeJavaScript(`
-    var cachedResult = '';
+    var doc = document.documentElement;
+    var clonedDoc = doc.cloneNode(true);
+    clonedDoc.querySelector('body').removeAttribute('unresolved');
 
-    function getDOMResponse() {
-      var doc = document.documentElement;
-      var clonedDoc = doc.cloneNode(true);
-      clonedDoc.querySelector('body').removeAttribute('unresolved');
-
-      replaceShadowRoots(doc, clonedDoc);
-      removeImports(clonedDoc);
-      if(importsString != '') {
-        ipcRenderer.send('setShadowAsyncImports', importsString);
-      }
-      removeScripts(clonedDoc);
-      insertShadowStyles(clonedDoc, shadowStyleList);
-      insertScriptsAndImports(clonedDoc);
-
-      var rawDOM = doc.outerHTML;
-      cachedResult = clonedDoc.outerHTML;
-      ipcRenderer.send('updateCache', false, rawDOM, cachedResult);
+    replaceShadowRoots(doc, clonedDoc);
+    removeImports(clonedDoc);
+    if(importsString != '') {
+      ipcRenderer.send('setShadowAsyncImports', importsString);
     }
+    removeScripts(clonedDoc);
+    insertShadowStyles(clonedDoc, shadowStyleList);
+    insertScriptsAndImports(clonedDoc);
+
+    ipcRenderer.send('receiveSerializedDOM', clonedDoc.outerHTML, false);
     `);
 }
