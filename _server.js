@@ -1,5 +1,3 @@
-const pjson = require('./package')
-
 const electron = require('electron'),
   app = electron.app,
   BrowserWindow = electron.BrowserWindow,
@@ -71,7 +69,7 @@ ipcMain.on('setShadowAsyncImports', (_, contents) => {
   shadowAsyncImports = contents
 })
 
-shadyServer.get(pjson['shady-entry-pages'], (req, res) => {
+shadyServer.get(/\/index[0-9]*.html/, (req, res) => {
   win.loadURL('file://' + __dirname + req.url)
   shadyRes = res
 
@@ -80,7 +78,7 @@ shadyServer.get(pjson['shady-entry-pages'], (req, res) => {
   })
 })
 
-shadowServer.get(pjson['shadow-entry-pages'], (req, res) => {
+shadowServer.get(/\/index[0-9]*shadow.html/, (req, res) => {
   win.loadURL('file://' + __dirname + req.url)
   shadowRes = res
 

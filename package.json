@@ -8,7 +8,5 @@
     "dom-serialize": "2.2.1",
     "bower": "1.7.x",
     "ngrok": "2.x"
-  },
-  "shady-entry-pages": ["/index.html", "/index2.html", "/index3.html", "/shadowroot.html"],
-  "shadow-entry-pages": ["/indexshadow.html", "/index2shadow.html", "/index3shadow.html", "/shadowroot.html"]
+  }
 }
