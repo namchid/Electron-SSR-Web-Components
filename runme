@@ -51,4 +51,35 @@ curl https://gist.githubusercontent.com/namchid/211418bb0a27a9f13d5fee339f078bb0
 # cd ../
 # curl https://gist.githubusercontent.com/namchid/30725d47c5633bda771f1ec9577d199a/raw/93cd3766cf0e560a521181ff71f2f0cfb0ce1434/scrolly_index.html -o index3.html
 
-## Download sources -- Linux
+## ~~~~~~~~~~~~~~~~~~~~~~~~ Download sources -- use this instead if on Linux ~~~~~~~~~~~~~~~~~~~~~~~~
+
+# # Pesto Example
+# cd src
+# wget https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/pesto/src/app-icons.html
+# wget https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/pesto/src/recipe-app.html
+# wget https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/pesto/src/recipe-detail.html
+# wget https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/pesto/src/recipe-list.html
+
+# cd ../data
+# wget https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/pesto/data/recipes.json
+
+# cd ../
+# wget -O pesto_manifest.json https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/pesto/manifest.json
+# wget -O index.html https://gist.githubusercontent.com/namchid/04a1228579999ef0da804fc487dbbda7/raw/254ee9093cb8a58cc7b4df3330012016300c3773/pesto_index.html
+
+# # Shrine Example
+# cd src
+# wget https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/shrine/src/shrine-app.html
+# wget https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/shrine/src/shrine-detail.html
+# wget https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/shrine/src/shrine-featured-item.html
+# wget https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/shrine/src/shrine-item.html
+# wget https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/shrine/src/shrine-list.html
+# wget https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/shrine/src/shrine-simple-item.html
+
+# cd ../data
+# wget https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/shrine/data/featured.json
+# wget https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/shrine/data/items.json
+
+# cd ../
+# wget -O shrine_manifest.json https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/shrine/manifest.json
+# wget -O index2.html https://gist.githubusercontent.com/namchid/211418bb0a27a9f13d5fee339f078bb0/raw/37b7af5983057408dcc89a5bad6a204b075a826b/shrine_index.html
