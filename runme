@@ -21,6 +21,7 @@ curl https://raw.githubusercontent.com/PolymerElements/app-layout/master/templat
 cd ../
 curl https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/pesto/manifest.json -o pesto_manifest.json
 curl https://gist.githubusercontent.com/namchid/04a1228579999ef0da804fc487dbbda7/raw/254ee9093cb8a58cc7b4df3330012016300c3773/pesto_index.html -o index.html
+curl https://gist.githubusercontent.com/namchid/84cff467ea29cacdfb7e30fe62ff4813/raw/dc8f2c9cad1e968dfaf7bc87f1c178ba3afc5e5d/pesto_index_shadow.html -o indexshadow.html
 
 # Shrine Example
 cd src
@@ -38,6 +39,7 @@ curl https://raw.githubusercontent.com/PolymerElements/app-layout/master/templat
 cd ../
 curl https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/shrine/manifest.json -o shrine_manifest.json
 curl https://gist.githubusercontent.com/namchid/211418bb0a27a9f13d5fee339f078bb0/raw/37b7af5983057408dcc89a5bad6a204b075a826b/shrine_index.html -o index2.html
+curl https://gist.githubusercontent.com/namchid/c845f1e2ce99ec2b8070eecef9da56c1/raw/9ea104adb68e5cb602b8ac80a5030239f6af46dd/shrine_index_shadow.html -o index2shadow.html
 
 # Shop Example
 
@@ -66,6 +68,7 @@ curl https://gist.githubusercontent.com/namchid/211418bb0a27a9f13d5fee339f078bb0
 # cd ../
 # wget -O pesto_manifest.json https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/pesto/manifest.json
 # wget -O index.html https://gist.githubusercontent.com/namchid/04a1228579999ef0da804fc487dbbda7/raw/254ee9093cb8a58cc7b4df3330012016300c3773/pesto_index.html
+# wget -O indexshadow.html https://gist.githubusercontent.com/namchid/84cff467ea29cacdfb7e30fe62ff4813/raw/dc8f2c9cad1e968dfaf7bc87f1c178ba3afc5e5d/pesto_index_shadow.html
 
 # # Shrine Example
 # cd src
@@ -83,3 +86,4 @@ curl https://gist.githubusercontent.com/namchid/211418bb0a27a9f13d5fee339f078bb0
 # cd ../
 # wget -O shrine_manifest.json https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/shrine/manifest.json
 # wget -O index2.html https://gist.githubusercontent.com/namchid/211418bb0a27a9f13d5fee339f078bb0/raw/37b7af5983057408dcc89a5bad6a204b075a826b/shrine_index.html
+# wget -O index2shadow.html https://gist.githubusercontent.com/namchid/c845f1e2ce99ec2b8070eecef9da56c1/raw/9ea104adb68e5cb602b8ac80a5030239f6af46dd/shrine_index_shadow.html
