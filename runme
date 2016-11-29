@@ -1,0 +1,54 @@
+## update Bower components and Node modules
+rm -rf bower_components || true
+rm -rf node_modues || true
+npm update
+bower update
+
+## Download sources -- Mac
+mkdir -p data
+mkdir -p src
+
+# Pesto Example
+cd src
+curl https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/pesto/src/app-icons.html -o app-icons.html
+curl https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/pesto/src/recipe-app.html -o recipe-app.html
+curl https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/pesto/src/recipe-detail.html -o recipe-detail.html
+curl https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/pesto/src/recipe-list.html -o recipe-list.html
+
+cd ../data
+curl https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/pesto/data/recipes.json -o recipes.json
+
+cd ../
+curl https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/pesto/manifest.json -o pesto_manifest.json
+curl https://gist.githubusercontent.com/namchid/04a1228579999ef0da804fc487dbbda7/raw/254ee9093cb8a58cc7b4df3330012016300c3773/pesto_index.html -o index.html
+
+# Shrine Example
+cd src
+curl https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/shrine/src/shrine-app.html -o shrine-app.html
+curl https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/shrine/src/shrine-detail.html -o shrine-detail.html
+curl https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/shrine/src/shrine-featured-item.html -o shrine-featured-item.html
+curl https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/shrine/src/shrine-item.html -o shrine-item.html
+curl https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/shrine/src/shrine-list.html -o shrine-list.html
+curl https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/shrine/src/shrine-simple-item.html -o shrine-simple-item.html
+
+cd ../data
+curl https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/shrine/data/featured.json -o featured.json
+curl https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/shrine/data/items.json -o items.json
+
+cd ../
+curl https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/shrine/manifest.json -o shrine_manifest.json
+curl https://gist.githubusercontent.com/namchid/211418bb0a27a9f13d5fee339f078bb0/raw/37b7af5983057408dcc89a5bad6a204b075a826b/shrine_index.html -o index2.html
+
+# Shop Example
+
+# News Example -- Not working because of core-scroll-header-panel issue: See https://github.com/webcomponents/webcomponentsjs/issues/41
+# cd src
+# curl https://gist.githubusercontent.com/namchid/b54c35a7b722fe263cc1cac86bda313e/raw/71f65f25760246cfc8a0e7ad7aaf38c59f316fc0/docs.html -o docs.html
+# curl https://gist.githubusercontent.com/namchid/b9e8fe458f27f80c1080bcb14d552c45/raw/9ba1a7d0fc54d75279ffe6ca6d69f0b63ab811ca/html-content.html -o html-content.html
+# curl https://gist.githubusercontent.com/namchid/52caf396cdeb70a0a95bd87569fde013/raw/30fde06f0e26f074791b6654f96a853525af3f04/page-scroll-view.html -o page-scroll-view.html
+# curl https://gist.githubusercontent.com/namchid/51cc2682638451c5a81d3b81413ee4b4/raw/cee9538445d86ef1d1b0b80f9b15332bb39caf23/scrolly-reader.html -o scrolly-reader.html
+
+# cd ../
+# curl https://gist.githubusercontent.com/namchid/30725d47c5633bda771f1ec9577d199a/raw/93cd3766cf0e560a521181ff71f2f0cfb0ce1434/scrolly_index.html -o index3.html
+
+## Download sources -- Linux
