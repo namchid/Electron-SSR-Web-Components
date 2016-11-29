@@ -26,10 +26,17 @@ Install Bower
 ```
 npm install bower
 ```
-Update installed packages for Polymer.
+Install/update packages for Polymer and Node.
 
 ```
 bower update
+
+npm update
+```
+Alternatively, run script to install Polymer and Node packages and download files for testing.
+
+```
+./runme
 ```
 Run Electron app locally
 ```
