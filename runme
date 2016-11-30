@@ -37,21 +37,21 @@ curl https://raw.githubusercontent.com/PolymerElements/app-layout/master/templat
 curl https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/shrine/data/items.json -o items.json
 
 cd ../
-curl https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/shrine/manifest.json -o shrine_manifest.json
+curl https://gist.githubusercontent.com/namchid/1bc67db681086d709d50379991ef9966/raw/95ff542d791397d66dd61e98b90f3e334838146a/shrine_manifest.json -o shrine_manifest.json
 curl https://gist.githubusercontent.com/namchid/211418bb0a27a9f13d5fee339f078bb0/raw/37b7af5983057408dcc89a5bad6a204b075a826b/shrine_index.html -o index2.html
 curl https://gist.githubusercontent.com/namchid/c845f1e2ce99ec2b8070eecef9da56c1/raw/9ea104adb68e5cb602b8ac80a5030239f6af46dd/shrine_index_shadow.html -o index2shadow.html
 
+# Getting Started Example
+cd src
+curl https://gist.githubusercontent.com/namchid/1aa5752f386e08419f87e5b6bcd7edd8/raw/7f336fc6ff146bf49fdb029629c4be5f17a959d3/x-app.html -o x-app.html
+
+cd ../
+curl https://gist.githubusercontent.com/namchid/04a4442469152cb2fb6c193589fece73/raw/c329fb499a2aa0c649052b11e7423b973d9e90c4/getting_started_index.html -o index3.html
+curl https://gist.githubusercontent.com/namchid/93f6e9be3897ed0436a63d67592b3f83/raw/c6d6049d853fb81a3b9eafbbdaab839049d64414/getting_started_index_shadow.html -o index3shadow.html
+
 # Shop Example
 
-# News Example -- Not working because of core-scroll-header-panel issue: See https://github.com/webcomponents/webcomponentsjs/issues/41
-# cd src
-# curl https://gist.githubusercontent.com/namchid/b54c35a7b722fe263cc1cac86bda313e/raw/71f65f25760246cfc8a0e7ad7aaf38c59f316fc0/docs.html -o docs.html
-# curl https://gist.githubusercontent.com/namchid/b9e8fe458f27f80c1080bcb14d552c45/raw/9ba1a7d0fc54d75279ffe6ca6d69f0b63ab811ca/html-content.html -o html-content.html
-# curl https://gist.githubusercontent.com/namchid/52caf396cdeb70a0a95bd87569fde013/raw/30fde06f0e26f074791b6654f96a853525af3f04/page-scroll-view.html -o page-scroll-view.html
-# curl https://gist.githubusercontent.com/namchid/51cc2682638451c5a81d3b81413ee4b4/raw/cee9538445d86ef1d1b0b80f9b15332bb39caf23/scrolly-reader.html -o scrolly-reader.html
-
-# cd ../
-# curl https://gist.githubusercontent.com/namchid/30725d47c5633bda771f1ec9577d199a/raw/93cd3766cf0e560a521181ff71f2f0cfb0ce1434/scrolly_index.html -o index3.html
+# News Example
 
 ## ~~~~~~~~~~~~~~~~~~~~~~~~ Download sources -- use this instead if on Linux ~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -84,6 +84,14 @@ curl https://gist.githubusercontent.com/namchid/c845f1e2ce99ec2b8070eecef9da56c1
 # wget https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/shrine/data/items.json
 
 # cd ../
-# wget -O shrine_manifest.json https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/shrine/manifest.json
+# wget -O shrine_manifest.json https://gist.githubusercontent.com/namchid/1bc67db681086d709d50379991ef9966/raw/95ff542d791397d66dd61e98b90f3e334838146a/shrine_manifest.json
 # wget -O index2.html https://gist.githubusercontent.com/namchid/211418bb0a27a9f13d5fee339f078bb0/raw/37b7af5983057408dcc89a5bad6a204b075a826b/shrine_index.html
 # wget -O index2shadow.html https://gist.githubusercontent.com/namchid/c845f1e2ce99ec2b8070eecef9da56c1/raw/9ea104adb68e5cb602b8ac80a5030239f6af46dd/shrine_index_shadow.html
+
+# Getting Started Example
+# cd src
+# wget https://gist.githubusercontent.com/namchid/1aa5752f386e08419f87e5b6bcd7edd8/raw/7f336fc6ff146bf49fdb029629c4be5f17a959d3/x-app.html
+
+# cd ../
+# wget -O index3.html https://gist.githubusercontent.com/namchid/04a4442469152cb2fb6c193589fece73/raw/c329fb499a2aa0c649052b11e7423b973d9e90c4/getting_started_index.html
+# wget -O index3shadow.html https://gist.githubusercontent.com/namchid/93f6e9be3897ed0436a63d67592b3f83/raw/c6d6049d853fb81a3b9eafbbdaab839049d64414/getting_started_index_shadow.html
