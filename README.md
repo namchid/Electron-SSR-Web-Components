@@ -42,11 +42,10 @@ Run Electron app locally
 ```
 electron .
 ```
-Navigate to Browser. Example links:
+Navigate to Browser. For pages that use Shady DOM, use port 3000. For Shadow DOM, use port 4000. Test cases use the following pattern:
 ```
-http://localhost:3000/index.html
-http://localhost:3000/index2.html
-http://localhost:3000/test.html
+http://localhost:3000/index[0-9]*.html
+http://localhost:4000/index[0-9]*shadow.html
 ```
 
 [Electron]: <https://github.com/electron/electron>
