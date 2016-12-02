@@ -3,6 +3,8 @@ const electron = require('electron'),
   BrowserWindow = electron.BrowserWindow,
   ipcMain = electron.ipcMain
 
+global.directory = 'file://' + __dirname + '/'
+
 const shadyServer = require('express')(),
   shadowServer = require('express')(),
   shadyPort = 3000,
@@ -137,6 +139,8 @@ function shadyGetDOMInsidePage() {
   win.webContents.executeJavaScript(`
     var ipcRenderer = require('electron').ipcRenderer;
     var asyncImports = '';
+    var remote = require('electron').remote;
+    var directory = remote.getGlobal('directory');
 
     var htmlImports = document.querySelectorAll('link[rel="import"]');
 
@@ -156,6 +160,12 @@ function shadyGetDOMInsidePage() {
       newImport.setAttribute('href', '_shadyAsyncFile.html');
       newImport.setAttribute('async', '');
       html.querySelector('head').appendChild(newImport);
+
+      // Make sure pathnames are relative
+      html.querySelectorAll('[url]').forEach((link) => { link.setAttribute('url', link.url.replace(directory, ''))});
+      html.querySelectorAll('[src]').forEach((link) => { link.setAttribute('src', link.src.replace(directory, ''))});
+      html.querySelectorAll('[href]').forEach((link) => { link.setAttribute('href', link.href.replace(directory, ''))});
+
 
       ipcRenderer.send('receiveSerializedDOM', html.documentElement.outerHTML, true);
     } else {
