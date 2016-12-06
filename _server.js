@@ -23,6 +23,10 @@ var listening = false,
   shadyAsyncImports = '',
   shadowAsyncImports = ''
 
+const LRUCache = require('./lruCache'),
+  cache = new LRUCache();
+
+
 // Setup for Electron app
 function createWindow() {
   win = new BrowserWindow({width: 800, height: 600})
