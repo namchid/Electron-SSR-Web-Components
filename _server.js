@@ -23,6 +23,11 @@ var listening = false,
   shadyAsyncImports = '',
   shadowAsyncImports = ''
 
+const LRUCache = require('./lruCache'),
+  cacheSize = 5, // arbitrary number
+  cache = new LRUCache(cacheSize),
+  hasher = require('string-hash')
+
 // Setup for Electron app
 function createWindow() {
   win = new BrowserWindow({width: 800, height: 600})
@@ -63,8 +68,9 @@ ipcMain.on('receiveSerializedDOM', (_, contents, isShady) => {
   }
 })
 
-ipcMain.on('setShadyAsyncImports', (_, contents) => {
-  shadyAsyncImports = contents
+ipcMain.on('setShadyAsyncImports', (event, key, value) => {
+  cache.set('_asyncImport' + key + '.html', value)
+  event.returnValue = true;
 })
 
 ipcMain.on('setShadowAsyncImports', (_, contents) => {
@@ -89,15 +95,18 @@ shadowServer.get(/\/index[0-9]*shadow.html/, (req, res) => {
   })
 })
 
-shadyServer.get('/_shadyAsyncFile.html', (req, res) => {
-  res.end(shadyAsyncImports)
-  shadyAsyncImports = ''
+shadyServer.get(/_asyncImport[0-9]+/, (req, res) => {
+  getAsyncImport(req.url.substring(1), res)
 })
 
-shadowServer.get('/_shadowAsyncFile.html', (req, res) => {
-  res.end(shadowAsyncImports)
-  shadowAsyncImports = ''
+shadowServer.get(/_asyncImport[0-9]+/, (req, res) => {
+  getAsyncImport(req.url.substring(1), res)
 })
+
+function getAsyncImport(key, res) {
+  console.log('key=' + key)
+  res.end('' + cache.get(key))
+}
 
 shadyServer.get('/*', returnRequest)
 
@@ -141,6 +150,7 @@ function shadyGetDOMInsidePage() {
     var asyncImports = '';
     var remote = require('electron').remote;
     var directory = remote.getGlobal('directory');
+    var hash = require('string-hash'); 
 
     var htmlImports = document.querySelectorAll('link[rel="import"]');
 
@@ -148,16 +158,19 @@ function shadyGetDOMInsidePage() {
       var html = document.cloneNode(true);
       html.querySelector('body').removeAttribute('unresolved');
 
+      var hashString = '';
       var imports = html.querySelectorAll('link[rel="import"]');
       imports.forEach((linkNode) => {
         asyncImports += linkNode.outerHTML;
+        hashString += linkNode['href'];
         linkNode.parentNode.removeChild(linkNode);
       });
-      ipcRenderer.send('setShadyAsyncImports', asyncImports);
+      var hashed = hash(hashString)
+      ipcRenderer.sendSync('setShadyAsyncImports', hashed, asyncImports)
 
       var newImport = html.createElement('link');
       newImport.setAttribute('rel', 'import');
-      newImport.setAttribute('href', '_shadyAsyncFile.html');
+      newImport.setAttribute('href', '_asyncImport' + hashed + '.html');
       newImport.setAttribute('async', '');
       html.querySelector('head').appendChild(newImport);
 
@@ -165,7 +178,6 @@ function shadyGetDOMInsidePage() {
       html.querySelectorAll('[url]').forEach((link) => { link.setAttribute('url', link.url.replace(directory, ''))});
       html.querySelectorAll('[src]').forEach((link) => { link.setAttribute('src', link.src.replace(directory, ''))});
       html.querySelectorAll('[href]').forEach((link) => { link.setAttribute('href', link.href.replace(directory, ''))});
-
 
       ipcRenderer.send('receiveSerializedDOM', html.documentElement.outerHTML, true);
     } else {
