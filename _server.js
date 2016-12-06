@@ -1,27 +1,27 @@
 const electron = require('electron'),
-  app = electron.app,
-  BrowserWindow = electron.BrowserWindow,
-  ipcMain = electron.ipcMain
+app = electron.app,
+BrowserWindow = electron.BrowserWindow,
+ipcMain = electron.ipcMain
 
 global.directory = 'file://' + __dirname + '/'
 
 const shadyServer = require('express')(),
-  shadowServer = require('express')(),
-  shadyPort = 3000,
-  shadowPort = 4000,
-  path = require('path'),
-  ngrok = require('ngrok')
+shadowServer = require('express')(),
+shadyPort = 3000,
+shadowPort = 4000,
+path = require('path'),
+ngrok = require('ngrok')
 
 const fs = require('fs'),
-  url = require('url')
+url = require('url')
 
 let win
 
 var listening = false,
-  shadyRes = null,
-  shadowRes = null,
-  shadyAsyncImports = '',
-  shadowAsyncImports = ''
+shadyRes = null,
+shadowRes = null,
+shadyAsyncImports = '',
+shadowAsyncImports = ''
 
 const LRUCache = require('./lruCache'),
   cacheSize = 5, // arbitrary number
@@ -82,7 +82,8 @@ shadyServer.get(/\/index[0-9]*.html/, (req, res) => {
   shadyRes = res
 
   win.webContents.on('did-finish-load', () => {
-    shadyGetDOMInsidePage()
+    shadyThenShadowGetDOMInsidePage()
+    // shadyGetDOMInsidePage()
   })
 })
 
@@ -123,7 +124,6 @@ function startServer() {
 
     ngrok.connect(shadyPort, (err, url) => { console.log('Shady ngrok url: ' + url) })
     ngrok.connect(shadowPort, (err, url) => { console.log('Shadow ngrok url: ' + url) })
-
   }
 }
 
@@ -143,6 +143,44 @@ function returnRequest(req, res) {
 shadowServer.on('listening', () => {
   listening = true
 })
+
+function shadyThenShadowGetDOMInsidePage() {
+  win.webContents.executeJavaScript(`
+    var ipcRenderer = require('electron').ipcRenderer;
+    var asyncImports = '';
+
+    var htmlImports = document.querySelectorAll('link[rel="import"]');
+
+    if(htmlImports.length > 0) {
+      var html = document.cloneNode(true);
+      html.querySelector('body').removeAttribute('unresolved');
+
+      var imports = html.querySelectorAll('link[rel="import"]');
+      var head = html.querySelector('head');
+      var shadowPolymerScript = document.createElement('script');
+      shadowPolymerScript.innerText = 'window.Polymer = { dom: "shadow", lazyRegister: true}';
+      head.insertBefore(shadowPolymerScript, imports[0]);
+
+      imports.forEach((linkNode) => {
+        asyncImports += linkNode.outerHTML;
+        linkNode.parentNode.removeChild(linkNode);
+      });
+      ipcRenderer.send('setShadyAsyncImports', asyncImports);
+
+      var newImport = html.createElement('link');
+      newImport.setAttribute('rel', 'import');
+      newImport.setAttribute('href', '_shadyAsyncFile.html');
+      newImport.setAttribute('async', '');
+      html.querySelector('head').appendChild(newImport);
+
+      console.log(html);
+
+      ipcRenderer.send('receiveSerializedDOM', html.documentElement.outerHTML, true);
+    } else {
+      ipcRenderer.send('receiveSerializedDOM', document.documentElement.outerHTML, true);
+    }
+    `);
+}
 
 function shadyGetDOMInsidePage() {
   win.webContents.executeJavaScript(`
@@ -183,7 +221,7 @@ function shadyGetDOMInsidePage() {
     } else {
       ipcRenderer.send('receiveSerializedDOM', document.documentElement.outerHTML, true);
     }
-  `);
+    `);
 }
 
 function shadowGetDOMInsidePage() {
