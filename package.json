@@ -4,9 +4,10 @@
   "version": "0.1.0",
   "main": "_server.js",
   "dependencies": {
-    "express": "^4.x",
-    "dom-serialize": "2.2.1",
     "bower": "1.7.x",
-    "ngrok": "2.x"
+    "dom-serialize": "2.2.1",
+    "express": "^4.x",
+    "ngrok": "2.x",
+    "string-hash": "^1.x"
   }
 }
