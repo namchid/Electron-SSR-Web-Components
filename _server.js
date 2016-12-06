@@ -68,13 +68,9 @@ ipcMain.on('receiveSerializedDOM', (_, contents, isShady) => {
   }
 })
 
-ipcMain.on('setShadyAsyncImports', (event, key, value) => {
+ipcMain.on('setAsyncImports', (event, key, value) => {
   cache.set('_asyncImport' + key + '.html', value)
   event.returnValue = true;
-})
-
-ipcMain.on('setShadowAsyncImports', (_, contents) => {
-  shadowAsyncImports = contents
 })
 
 shadyServer.get(/\/index[0-9]*.html/, (req, res) => {
@@ -105,7 +101,6 @@ shadowServer.get(/_asyncImport[0-9]+/, (req, res) => {
 })
 
 function getAsyncImport(key, res) {
-  console.log('key=' + key)
   res.end('' + cache.get(key))
 }
 
@@ -148,6 +143,9 @@ function shadyThenShadowGetDOMInsidePage() {
   win.webContents.executeJavaScript(`
     var ipcRenderer = require('electron').ipcRenderer;
     var asyncImports = '';
+    var remote = require('electron').remote;
+    var directory = remote.getGlobal('directory');
+    var hash = require('string-hash'); 
 
     var htmlImports = document.querySelectorAll('link[rel="import"]');
 
@@ -161,23 +159,29 @@ function shadyThenShadowGetDOMInsidePage() {
       shadowPolymerScript.innerText = 'window.Polymer = { dom: "shadow", lazyRegister: true}';
       head.insertBefore(shadowPolymerScript, imports[0]);
 
+      var hashString = '';
       imports.forEach((linkNode) => {
         asyncImports += linkNode.outerHTML;
+        hashString += linkNode['href'];
         linkNode.parentNode.removeChild(linkNode);
       });
-      ipcRenderer.send('setShadyAsyncImports', asyncImports);
+      var hashed = hash(hashString)
+      ipcRenderer.send('setAsyncImports', hashed, asyncImports);
 
       var newImport = html.createElement('link');
       newImport.setAttribute('rel', 'import');
-      newImport.setAttribute('href', '_shadyAsyncFile.html');
+      newImport.setAttribute('href', '_asyncImport' + hashed + '.html');
       newImport.setAttribute('async', '');
       html.querySelector('head').appendChild(newImport);
 
-      console.log(html);
+      // Make sure pathnames are relative
+      html.querySelectorAll('[url]').forEach((link) => { link.setAttribute('url', link.url.replace(directory, ''))});
+      html.querySelectorAll('[src]').forEach((link) => { link.setAttribute('src', link.src.replace(directory, ''))});
+      html.querySelectorAll('[href]').forEach((link) => { link.setAttribute('href', link.href.replace(directory, ''))});
 
-      ipcRenderer.send('receiveSerializedDOM', html.documentElement.outerHTML, true);
+      ipcRenderer.send('receiveSerializedDOM', html.documentElement.outerHTML, false);
     } else {
-      ipcRenderer.send('receiveSerializedDOM', document.documentElement.outerHTML, true);
+      ipcRenderer.send('receiveSerializedDOM', document.documentElement.outerHTML, false);
     }
     `);
 }
@@ -204,7 +208,7 @@ function shadyGetDOMInsidePage() {
         linkNode.parentNode.removeChild(linkNode);
       });
       var hashed = hash(hashString)
-      ipcRenderer.sendSync('setShadyAsyncImports', hashed, asyncImports)
+      ipcRenderer.sendSync('setAsyncImports', hashed, asyncImports)
 
       var newImport = html.createElement('link');
       newImport.setAttribute('rel', 'import');
