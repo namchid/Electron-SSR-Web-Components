@@ -82,8 +82,7 @@ shadyServer.get(/\/index[0-9]*.html/, (req, res) => {
   shadyRes = res
 
   win.webContents.on('did-finish-load', () => {
-    shadyThenShadowGetDOMInsidePage()
-    // shadyGetDOMInsidePage()
+    shadyGetDOMInsidePage()
   })
 })
 
@@ -92,7 +91,8 @@ shadowServer.get(/\/index[0-9]*shadow.html/, (req, res) => {
   shadowRes = res
 
   win.webContents.on('did-finish-load', () => {
-    shadowGetDOMInsidePage()
+    shadyThenShadowGetDOMInsidePage()
+    // shadowGetDOMInsidePage()
   })
 })
 
