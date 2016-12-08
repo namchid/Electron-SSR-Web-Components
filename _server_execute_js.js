@@ -91,7 +91,12 @@ module.exports = function() {
     /** Modified from Kevin's WC-SSR (link in README)**/
     shadowVersion: function() {
       var ipcRenderer = require('electron').ipcRenderer;
-      var importsString = '';
+      var remote = require('electron').remote;
+      var directory = remote.getGlobal('directory');
+      var hash = require('string-hash'); 
+      var hashString = '';
+
+      var asyncImports = '';
       var removedImports = new Set();
 
       var shadowStyleList = [];
@@ -109,7 +114,8 @@ module.exports = function() {
         [].slice.call(imports).forEach(function(el) {
           var temp = el.outerHTML;
           if(!removedImports.has(temp)) {
-            importsString += el.outerHTML + String.fromCharCode(13);
+            hashString += el['href'];
+            asyncImports += el.outerHTML + String.fromCharCode(13);
             removedImports.add(temp);
           }
           el.remove();
@@ -198,28 +204,28 @@ module.exports = function() {
         head.insertBefore(script, head.firstChild.nextSibling);
       }
 
-      function insertImportLink() {
+      function insertImportLink(hashedURL) {
         var linkNode = document.createElement('link');
         linkNode.setAttribute('rel', 'import');
-        linkNode.setAttribute('href', '_shadowAsyncFile.html');
+        linkNode.setAttribute('href', hashedURL);
         linkNode.setAttribute('async', '');
         var head = document.querySelector('head');
         head.appendChild(linkNode);
       }
 
-      function registerAndReinsert() {
+      function registerAndReinsert(importURL) {
         insertPolymerShadowDom();
         registerShadowRoot();
-        insertImportLink();
+        insertImportLink(importURL);
       }
 
-      function insertScriptsAndImports(clonedDoc) {
+      function insertScriptsAndImports(clonedDoc, hashedNum) {
         var scripts = document.createElement('script');
 
         scripts.textContent = insertPolymerShadowDom.toString();
         scripts.textContent += String.fromCharCode(13) + registerShadowRoot.toString();
         scripts.textContent += String.fromCharCode(13) + insertImportLink.toString();
-        scripts.textContent += String.fromCharCode(13) + '(' + registerAndReinsert.toString() + ')();';
+        scripts.textContent += String.fromCharCode(13) + '(' + registerAndReinsert.toString() + ')("_asyncImport' + hashedNum + '.html");';
 
         clonedDoc.querySelector('head').appendChild(scripts);
       }
@@ -230,12 +236,13 @@ module.exports = function() {
 
       replaceShadowRoots(doc, clonedDoc);
       removeImports(clonedDoc);
-      if(importsString != '') {
-        ipcRenderer.send('setShadowAsyncImports', importsString);
+      var hashed = hash(hashString);
+      if(asyncImports != '') {
+        ipcRenderer.send('setAsyncImports', hashed, asyncImports);
       }
       removeScripts(clonedDoc);
       insertShadowStyles(clonedDoc, shadowStyleList);
-      insertScriptsAndImports(clonedDoc);
+      insertScriptsAndImports(clonedDoc, hashed);
 
       ipcRenderer.send('receiveSerializedDOM', clonedDoc.outerHTML, false);
     }
