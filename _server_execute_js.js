@@ -118,7 +118,7 @@ module.exports = function() {
             asyncImports += el.outerHTML + String.fromCharCode(13);
             removedImports.add(temp);
           }
-          el.remove();
+          el.remove(); 
         });
       }
 
@@ -243,6 +243,11 @@ module.exports = function() {
       removeScripts(clonedDoc);
       insertShadowStyles(clonedDoc, shadowStyleList);
       insertScriptsAndImports(clonedDoc, hashed);
+
+      // Make sure pathnames are relative
+      clonedDoc.querySelectorAll('[url]').forEach((link) => { link.setAttribute('url', link.url.replace(directory, ''))});
+      clonedDoc.querySelectorAll('[src]').forEach((link) => { link.setAttribute('src', link.src.replace(directory, ''))});
+      clonedDoc.querySelectorAll('[href]').forEach((link) => { link.setAttribute('href', link.href.replace(directory, ''))});
 
       ipcRenderer.send('receiveSerializedDOM', clonedDoc.outerHTML, false);
     }
