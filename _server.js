@@ -31,7 +31,7 @@ const LRUCache = require('./lruCache'),
 // Setup for Electron app
 function createWindow() {
   win = new BrowserWindow({width: 800, height: 600})
-  win.loadURL(`file://${__dirname}/_server_index.html`)
+  win.loadURL('data:text/html;charset:utf-8,<html></html>')
   win.webContents.openDevTools()
 
   win.on('closed', () => {
