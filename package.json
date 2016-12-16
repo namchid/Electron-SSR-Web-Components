@@ -9,5 +9,14 @@
     "express": "^4.x",
     "ngrok": "2.x",
     "string-hash": "^1.x"
+  },
+  "devDependencies": {
+    "clang-format": "^1.0.46",
+    "eslint": "^3.12.2",
+    "eslint-config-google": "^0.7.1"
+  },
+  "scripts": {
+    "format": "ls *.js | xargs clang-format --style=file -i",
+    "lint": "eslint *.js"
   }
 }
