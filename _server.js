@@ -38,6 +38,44 @@ function createWindow() {
   });
 }
 
+/**
+* Returns the string containing the HTML imports.
+* @param {String} key The key of the HTML imports in the cache.
+* @param {Object} res The response object.
+*/
+function startServer() {
+  if (!listening) {
+    shadyServer.listen(shadyPort);
+
+    shadowServer.listen(shadowPort,
+                        () => {
+      shadowServer.emit('listening', null);
+    });
+
+    ngrok.connect(shadyPort,
+                  (err, url) => {
+      console.log('Shady ngrok url: ' + url);
+    });
+
+    ngrok.connect(shadowPort,
+                  (err, url) => {
+      console.log('Shadow ngrok url: ' + url);
+    });
+  }
+}
+
+shadowServer.on('listening', () => {
+  listening = true;
+});
+
+/**
+* Closes the server ports.
+*/
+function stopServer() {
+  shadyServer.close();
+  shadowServer.close();
+}
+
 app.on('ready', createWindow);
 
 app.on('window-all-closed', () => {
@@ -106,44 +144,6 @@ function getAsyncImport(key, res) {
   res.end('' + cache.get(key));
 }
 
-shadyServer.get('/*', returnRequest);
-
-shadowServer.get('/*', returnRequest);
-
-/**
-* Returns the string containing the HTML imports.
-* @param {String} key The key of the HTML imports in the cache.
-* @param {Object} res The response object.
-*/
-function startServer() {
-  if (!listening) {
-    shadyServer.listen(shadyPort);
-
-    shadowServer.listen(shadowPort,
-                        () => {
-      shadowServer.emit('listening', null);
-    });
-
-    ngrok.connect(shadyPort,
-                  (err, url) => {
-      console.log('Shady ngrok url: ' + url);
-    });
-
-    ngrok.connect(shadowPort,
-                  (err, url) => {
-      console.log('Shadow ngrok url: ' + url);
-    });
-  }
-}
-
-/**
-* Closes the server ports.
-*/
-function stopServer() {
-  shadyServer.close();
-  shadowServer.close();
-}
-
 /**
 * Sends the requested file as the response without any modification.
 * @param {Object} req The request to the server.
@@ -157,9 +157,9 @@ function returnRequest(req, res) {
   res.sendFile(p);
 }
 
-shadowServer.on('listening', () => {
-  listening = true;
-});
+shadyServer.get('/*', returnRequest);
+
+shadowServer.get('/*', returnRequest);
 
 /* eslint no-unused-vars:
 ["error", {"varsIgnorePattern": "shadyThenShadowGetDOMInsidePage"}]*/
