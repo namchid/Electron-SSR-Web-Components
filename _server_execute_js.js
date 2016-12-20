@@ -9,7 +9,7 @@ module.exports = function() {
 
         let shadowPolymerScript = document.createElement('script');
         shadowPolymerScript.innerText =
-            'window.Polymer = { dom: "shadow", lazyRegister: true}';
+            'window.Polymer = { dom: "shadow"}';
         let imports = html.querySelectorAll('link[rel="import"]');
         html.querySelector('head').insertBefore(shadowPolymerScript,
           imports[0]);
@@ -182,7 +182,7 @@ module.exports = function() {
 
         let script = document.createElement('script');
         script.textContent =
-            'window.Polymer = {dom: "shadow", lazyRegister: true}';
+            'window.Polymer = {dom: "shadow"}';
         head.insertBefore(script, head.firstChild.nextSibling);
       }
 
