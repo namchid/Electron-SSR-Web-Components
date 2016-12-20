@@ -1,6 +1,5 @@
 const electron = require('electron');
-const shadyServer = require('express')();
-const shadowServer = require('express')();
+const express = require('express');
 const LRUCache = require('./lruCache');
 const ngrok = require('ngrok');
 const path = require('path');
@@ -11,10 +10,12 @@ const BrowserWindow = electron.BrowserWindow;
 let cache = new LRUCache(100);
 const ipcMain = electron.ipcMain;
 let listening = false;
-const shadyPort = 3000;
 const shadowPort = 4000;
-let shadyRes = null;
 let shadowRes = null;
+const shadowServer = express();
+const shadyPort = 3000;
+let shadyRes = null;
+const shadyServer = express();
 let win = null;
 
 global.directory = 'file://' + __dirname + '/';
@@ -120,28 +121,22 @@ shadowServer.get(/\/index[0-9]*shadow.html/, (req, res) => {
 
   win.webContents.on('did-finish-load', () => {
     // To use the hybrid version instead, use this instead:
-    // shadyThenShadowGetDOMInsidePage()
+    // shadyThenShadowGetDOMInsidePage();
     shadowGetDOMInsidePage();
   });
 });
 
-shadyServer.get(/_asyncImport[0-9]+/,
-                (req, res) => {
-  getAsyncImport(req.url.substring(1), res);
-});
+shadyServer.get(/_asyncImport[0-9]+/, getAsyncImport);
 
-shadowServer.get(/_asyncImport[0-9]+/,
-                 (req, res) => {
-  getAsyncImport(req.url.substring(1), res);
-});
+shadowServer.get(/_asyncImport[0-9]+/, getAsyncImport);
 
 /**
 * Returns the string containing the HTML imports.
-* @param {String} key The key of the HTML imports in the cache.
+* @param {String} req The request to the server.
 * @param {Object} res The response from the server.
 */
-function getAsyncImport(key, res) {
-  res.end('' + cache.get(key));
+function getAsyncImport(req, res) {
+  res.end('' + cache.get(req.url.substring(1)));
 }
 
 /**
