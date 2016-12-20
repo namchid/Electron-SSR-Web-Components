@@ -11,7 +11,8 @@ module.exports = function() {
         shadowPolymerScript.innerText =
             'window.Polymer = { dom: "shadow", lazyRegister: true}';
         let imports = html.querySelectorAll('link[rel="import"]');
-        html.querySelector('head').insertBefore(shadowPolymerScript, imports[0]);
+        html.querySelector('head').insertBefore(shadowPolymerScript,
+          imports[0]);
 
         removeImportsAndSetInCache(html);
         makePathsRelative(html);
@@ -41,16 +42,6 @@ module.exports = function() {
     },
     /** Modified from Kevin's WC-SSR (link in README)**/
     shadowVersion: function() {
-      const ipcRenderer = require('electron').ipcRenderer;
-      const hash = require('string-hash');
-      let hashKey = '';
-
-      let hashValue = '';
-      let removedImports = new Set();
-
-      let shadowStyleList = [];
-      let shadowStyleMap = {};
-
       /**
       * Removes scripts.
       * @param {Object} container The element to remove scripts from.
@@ -72,7 +63,7 @@ module.exports = function() {
           const temp = el.outerHTML;
           if (!removedImports.has(temp)) {
             hashKey += el['href'];
-            hashValue += el.outerHTML + String.fromCharCode(13);
+            hashValue += el.outerHTML + space;
             removedImports.add(temp);
           }
           el.remove();
@@ -232,16 +223,23 @@ module.exports = function() {
         let scripts = document.createElement('script');
 
         scripts.textContent = insertPolymerShadowDom.toString();
-        scripts.textContent +=
-            String.fromCharCode(13) + registerShadowRoot.toString();
-        scripts.textContent +=
-            String.fromCharCode(13) + insertImportLink.toString();
-        scripts.textContent += String.fromCharCode(13) + '(' +
+        scripts.textContent += space + registerShadowRoot.toString();
+        scripts.textContent += space + insertImportLink.toString();
+        scripts.textContent += space + '(' +
                                registerAndReinsert.toString() +
                                ')("_asyncImport' + hashedNum + '.html");';
 
         clonedDoc.querySelector('head').appendChild(scripts);
       }
+
+      const ipcRenderer = require('electron').ipcRenderer;
+      const hash = require('string-hash');
+      let hashKey = '';
+      let hashValue = '';
+      let removedImports = new Set();
+      let shadowStyleList = [];
+      let shadowStyleMap = {};
+      const space = String.fromCharCode(13);
 
       const doc = document.documentElement;
       let clonedDoc = doc.cloneNode(true);
@@ -264,6 +262,10 @@ module.exports = function() {
   };
 };
 
+/**
+* Removes path to the current directory to make URLs relative.
+* @param {String} container The element to look query for URLs.
+*/
 function makePathsRelative(container) {
   const remote = require('electron').remote;
   const directory = remote.getGlobal('directory');
@@ -281,6 +283,10 @@ function makePathsRelative(container) {
         });
 };
 
+/**
+* Removes HTML imports and stores them in cache for later retrieval.
+* @param {String} container The element to remove HTML imports from.
+*/
 function removeImportsAndSetInCache(container) {
   const hash = require('string-hash');
   let hashKey = '';
@@ -293,7 +299,8 @@ function removeImportsAndSetInCache(container) {
       linkNode.parentNode.removeChild(linkNode);
     });
   hashKey = hash(hashKey);
-  require('electron').ipcRenderer.sendSync('setAsyncImports', hashKey, hashValue);
+  require('electron').ipcRenderer.sendSync('setAsyncImports',
+    hashKey, hashValue);
 
   let newImport = container.createElement('link');
   newImport.setAttribute('rel', 'import');
