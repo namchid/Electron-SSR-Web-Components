@@ -1,0 +1,7 @@
+.DS_Store
+bower_components
+node_modules
+src
+data
+index*.html
+*manifest.json

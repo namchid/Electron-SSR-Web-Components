@@ -2,9 +2,21 @@
   "name": "Electron-SSR-Web-Components",
   "description": "Using Electron to render web components on the server",
   "version": "0.1.0",
-  "main": "server.js",
+  "main": "_server.js",
   "dependencies": {
-  	"express": "3.x"
+    "bower": "1.7.x",
+    "dom-serialize": "2.2.1",
+    "express": "^4.x",
+    "ngrok": "2.x",
+    "string-hash": "^1.x"
+  },
+  "devDependencies": {
+    "clang-format": "^1.0.46",
+    "eslint": "^3.12.2",
+    "eslint-config-google": "^0.7.1"
+  },
+  "scripts": {
+    "format": "ls *.js | xargs clang-format --style=file -i",
+    "lint": "eslint *.js"
   }
 }
-
