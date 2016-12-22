@@ -281,7 +281,7 @@ function makePathsRelative(container) {
       (link) => {
           link.setAttribute('href', link.href.replace(directory, ''));
         });
-};
+}
 
 /**
 * Removes HTML imports and stores them in cache for later retrieval.
