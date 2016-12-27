@@ -1,6 +1,6 @@
 const electron = require('electron');
 const express = require('express');
-const LRUCache = require('./lruCache');
+const LRUCache = require('./_lruCache');
 const ngrok = require('ngrok');
 const path = require('path');
 const url = require('url');
