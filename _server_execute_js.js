@@ -1,5 +1,10 @@
 module.exports = function() {
   return {
+    /**
+    * Server rendering for web components that first returns
+    * the document with shady DOM and then upgrades the elements
+    * with shadow roots.
+    */
     hybridVersion: function() {
       const ipcRenderer = require('electron').ipcRenderer;
 
@@ -24,6 +29,10 @@ module.exports = function() {
                          document.documentElement.outerHTML, false);
       }
     },
+    /**
+    * Server rendering for web components for documents that
+    * use shady DOM.
+    */
     shadyVersion: function() {
       const ipcRenderer = require('electron').ipcRenderer;
 
@@ -40,7 +49,15 @@ module.exports = function() {
                          document.documentElement.outerHTML, true);
       }
     },
-    /** Modified from Kevin's WC-SSR (link in README)**/
+    /**
+    * Server rendering for web components for documents that
+    * use shadow DOM. The server first sends down a document with
+    * placeholder tags for shadow roots and later upgrades
+    * by registering the custom elements with proper styling and
+    * reimporting HTML for interactivity.
+    * 
+    * This has been modified from Kevin's WC-SSR (link in README)
+    **/
     shadowVersion: function() {
       /**
       * Removes scripts.
