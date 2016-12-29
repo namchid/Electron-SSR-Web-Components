@@ -3,11 +3,10 @@
 This project is a proof-of-concept for server-side rendering of Polymer web components using an [Electron] server. Server-side rendering of web components provides several benefits, including faster initial load time, indexability of the web components for SEO purposes, and exposure of their content for content previews. 
 
 ## Overview
----
+
 The server currently has three approaches for the rendering. The first approach deals with documents that use Polymer's [shady DOM]. The second approach is for documents that use native [shadow DOM]. The third is a hybrid approach that first sends down Shady CSS and later upgrades the custom elements to use shadow DOM. This approach was inspired by issues encountered in the other two.
 
 ## Setup
----
 
 #### Installation
 Before setting up, install [Node.js] and npm.
@@ -75,7 +74,7 @@ If you prefer a different naming scheme or directory structure, add or modify th
 One way to test the performance of this server is through [WebpageTest]. Because ngrok exposes the server to the Internet, you can use the generated ngrok URL followed by the name of the file to test. 
 
 ## Notes
----
+
 Parts of the JavaScript code executed on the server for serving documents that use shadow DOM are adapted from Kevin Schaaf's [WC-SSR].
 
 At the moment there are separate routes for rendering pages with shady and shadow DOM (see the ***Viewing the Results*** subsection under the ***Setup*** section). Eventually, 
@@ -85,7 +84,7 @@ The hybrid version mentioned in ***Overview*** is currently not hooked in, but i
 This project works best on Chrome. Compatibility in other browsers is not assured.
 
 ## Related Links
----
+
 For more backgorund on this project, read [web components] and the [Polymer] library.
 
 [Electron]: <https://github.com/electron/electron>
