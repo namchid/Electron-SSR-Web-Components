@@ -49,6 +49,9 @@ cd ../
 curl https://gist.githubusercontent.com/namchid/04a4442469152cb2fb6c193589fece73/raw/c329fb499a2aa0c649052b11e7423b973d9e90c4/getting_started_index.html -o index3.html
 curl https://gist.githubusercontent.com/namchid/93f6e9be3897ed0436a63d67592b3f83/raw/c6d6049d853fb81a3b9eafbbdaab839049d64414/getting_started_index_shadow.html -o index3shadow.html
 
+# A simple Polymer 2.0 example for testing multiple shadow roots
+curl https://gist.githubusercontent.com/namchid/4c25d137a1e213580a83a48f404b29ac/raw/687476236fc030f562be80ed1fc04609920862e0/index4shadow.html -o index4shadow.html
+
 # Shop Example
 
 # News Example
@@ -95,3 +98,7 @@ curl https://gist.githubusercontent.com/namchid/93f6e9be3897ed0436a63d67592b3f83
 # cd ../
 # wget -O index3.html https://gist.githubusercontent.com/namchid/04a4442469152cb2fb6c193589fece73/raw/c329fb499a2aa0c649052b11e7423b973d9e90c4/getting_started_index.html
 # wget -O index3shadow.html https://gist.githubusercontent.com/namchid/93f6e9be3897ed0436a63d67592b3f83/raw/c6d6049d853fb81a3b9eafbbdaab839049d64414/getting_started_index_shadow.html
+
+#  A simple Polymer 2.0 example for testing multiple shadow roots
+# wget https://gist.githubusercontent.com/namchid/4c25d137a1e213580a83a48f404b29ac/raw/687476236fc030f562be80ed1fc04609920862e0
+index4shadow.html
