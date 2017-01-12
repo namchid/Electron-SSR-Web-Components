@@ -5,3 +5,4 @@ src
 data
 index*.html
 *manifest.json
+*.class

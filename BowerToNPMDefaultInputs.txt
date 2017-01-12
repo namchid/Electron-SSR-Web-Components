@@ -1,0 +1,5 @@
+node_modules/@polymer/polymer/polymer.html
+node_modules/@polymer/polymer/node_modules/webcomponents.js/webcomponents-lite.js
+bower_components/polymer/polymer.html
+bower_components/webcomponentsjs/webcomponents-lite.js
+bower_components
