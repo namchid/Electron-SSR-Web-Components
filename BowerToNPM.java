@@ -35,8 +35,48 @@ public class BowerToNPM {
             }
 
             private void rewriteFiles(Path directory) {
-                // TODO(namchi): Get files in directory and change path names
-                ArrayDeque<String> files = filesToRewrite(directory.toFile());
+                try {
+                    ArrayDeque<String> files = filesToRewrite(directory.toFile());
+
+                    BufferedReader reader = null;
+                    BufferedWriter writer = null;
+
+                    for(String f: files) {
+                        // Note: Must call .getParent() because we want to see the relationship between the
+                        // current file's enclosing folder and the old files
+
+                        // Relative path from this file to new Polymer file
+                        String relativePolymerPath = Paths.get(f).getParent().relativize(polymerPath).toString();
+                        // Relative path from this file to new webcomponents file
+                        String relativeWcPath = Paths.get(f).getParent().relativize(wcPath).toString();
+                        // Relative path from this file to old Polymer file
+                        String relativeOldPolymerPath = Paths.get(f).getParent().relativize(oldPolymerPath).toString();
+                        // Relative path from this file to old webcomponents file
+                        String relativeOldWcPath = Paths.get(f).getParent().relativize(oldWcPath).toString();
+
+                        reader = new BufferedReader(new FileReader(f));
+                        StringBuilder sb = new StringBuilder();
+                        String line = "";
+
+                        while((line = reader.readLine()) != null) {
+                            line = line.replaceAll(relativeOldPolymerPath, relativePolymerPath);
+                            line = line.replaceAll(relativeOldWcPath, relativeWcPath);
+                            sb.append(line + "\n");
+                        }
+
+                        reader.close();
+                        writer = new BufferedWriter(new FileWriter(f));
+                        writer.write(sb.toString());
+                        writer.close();
+                    }
+
+                    if(writer != null) writer.close();
+                    if(reader != null) reader.close();
+                } catch(Exception e) {
+                    System.err.println("Whoopsie. Something went wrong.");
+                    e.printStackTrace();
+                    System.exit(1);
+                }
             }
 
             private ArrayDeque<String> filesToRewrite(File directory) {
@@ -61,45 +101,54 @@ public class BowerToNPM {
         BowerToNPMConverter converter = new BowerToNPMConverter(polymerPath, wcPath, oldPolymerPath, oldWcPath, directory);
     }
 
+    // Note: This must return an absolute path
     private static Path checkPath(String path) {
         if(!new File(path).exists()) {
             System.err.println("Invalid path: " + path);
             System.exit(1);
         }
         
-        return Paths.get(path);
+        return Paths.get(new File(path).getAbsolutePath());
     }
 
     public static void main(String[] args) {
+        // silent
+        boolean silentMode = false;
+        if(args.length > 0) {
+            if(args[0].equals("-s")) {
+                silentMode = true;
+            }
+        }
+
         Scanner in = new Scanner(System.in);
         String input = "";
 
         // node_modules/@polymer/polymer/polymer.html
-        System.out.print(RESET + BLUE + "Path to " + RESET + BOLD + "NEW Polymer file: " + RESET + GREEN);
+        if(!silentMode) System.out.print(RESET + BLUE + "Path to " + RESET + BOLD + "NEW Polymer file: " + RESET + GREEN);
         input = in.next();
         System.out.print(RESET);
         Path polymerPath = checkPath(input);
 
         // node_modules/@polymer/polymer/node_modules/webcomponents.js/webcomponents-lite.js
-        System.out.print(RESET + BLUE + "Path to " + RESET + BOLD + "NEW webcomponents.js file: " + RESET + GREEN);
+        if(!silentMode) System.out.print(RESET + BLUE + "Path to " + RESET + BOLD + "NEW webcomponents.js file: " + RESET + GREEN);
         input = in.next();
         System.out.print(RESET);
         Path wcPath = checkPath(input);
 
         // bower_components/polymer/polymer.html
-        System.out.print(RESET + BLUE + "Path to " + RESET + BOLD + "OLD Polymer file: " + RESET + GREEN);
+        if(!silentMode)System.out.print(RESET + BLUE + "Path to " + RESET + BOLD + "OLD Polymer file: " + RESET + GREEN);
         input = in.next();
         System.out.print(RESET);
         Path oldPolymerPath = checkPath(input);
 
         // bower_components/webcomponentsjs/webcomponents-lite.js
-        System.out.print(RESET + BLUE + "Path to " + RESET + BOLD + "OLD webcomponents.js file: " + RESET + GREEN);
+        if(!silentMode) System.out.print(RESET + BLUE + "Path to " + RESET + BOLD + "OLD webcomponents.js file: " + RESET + GREEN);
         input = in.next();
         System.out.print(RESET);
         Path oldWcPath = checkPath(input);
 
         // bower_components/
-        System.out.print(RESET + BLUE + "Path to " + RESET + BOLD + "directory or file to convert: " + RESET + GREEN);
+        if(!silentMode) System.out.print(RESET + BLUE + "Path to " + RESET + BOLD + "directory or file to convert: " + RESET + GREEN);
         input = in.next();
         System.out.print(RESET);
         Path directory = checkPath(input);
