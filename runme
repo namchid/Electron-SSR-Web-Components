@@ -1,4 +1,6 @@
 BLUE='\033[0;34m'
+GREEN='\033[1;32m'
+RED='\033[1;31m'
 RESET='\033[0m'
 
 BBLUE='\033[1;34;107m'
@@ -9,40 +11,103 @@ BRED='\033[1;31;107m'
 BOLD='\033[1m'
 BG='\033[107m'
 
+YES_NO="(${RESET}${GREEN}Y${RESET}${BLUE}/${RESET}${RED}n${RESET}${BLUE}) ${RESET}"
+
 update_bc=true
 update_np=true
+modified_polymer=false
 
-while getopts "b|:e|:h|:n|:p|:w" opt; do
+print_help() {
+  printf "${BBLUE}  O${BRED}p${BYELLOW}t${BBLUE}i${BGREEN}o${BRED}n${BBLUE}s${RESET}${BG}:  ${RESET}\n"
+  printf "${BLUE}-b${RESET}: DO ${BOLD}NOT${RESET} update ${BG}bower components${RESET} (also keeps pre-existing bower_components folder)\n"
+  printf "${BLUE}-e${RESET}: Download some ${BG}test cases${RESET}\n"
+  printf "${BLUE}-n${RESET}: Do ${BOLD}NOT${RESET} update ${BG}node modules${RESET} (also keeps pre-existing node_modules folder)\n"
+  printf "${BLUE}-p${RESET}: Use ${BG}modified Polymer 1.0${RESET} version\n"
+  printf "${BLUE}-w${RESET}: Use ${BG}wget${RESET} instead of ${BG}curl${RESET}\n"
+  printf "${BLUE}-h${RESET}: For ${BG}help${RESET}, i.e. printing this message again. ¯\_(ツ)_/¯\n"
+}
+
+use_modified_polymer() {
+  printf "${BOLD}To use the modified Polymer 1.0 version:${RESET}\n"
+
+  printf "${BLUE}To continue, clone the Polymer repository? ${RESET}${YES_NO}"
+  read input
+
+  shopt -s nocasematch
+    if [[ $input == "yes" ]] || [[ $input == "y" ]]; then
+      git clone "https://github.com/Polymer/polymer.git"
+      modified_polymer=true
+    else
+      printf "${RED}Exiting without download.${RESET}"
+    fi
+  shopt -u nocasematch
+}
+
+change_paths() {
+  printf "${BOLD}Paths must be converted from Polymer in ${BG}bower_components${RESET}${BOLD} to "
+  printf "Polymer in ${BG}node_modules${RESET}.\n${RESET}"
+  printf "${BLUE}Continue?${RESET} ${YES_NO}"
+
+  read input
+
+  shopt -s nocasematch
+    if [[ $input == "yes" ]] || [[ $input == "y" ]]; then
+      rm BowerToNPM*.class
+      javac BowerToNPM.java
+
+      printf "${BLUE}Attempt to use default paths for ${RESET}${BG}webcomponentsjs${RESET} "
+      printf "and ${BG}polymer${RESET}${BLUE}? ${RESET}"
+      printf "${YES_NO}"
+
+      read input
+      shopt -s nocasematch
+        if [[ $input == "yes" ]] || [[ $input == "y" ]]; then
+          java BowerToNPM -s < _default_bower_to_npm_inputs.txt
+        elif [[ $input == "no" ]] || [[ $input == "n" ]]; then
+          java BowerToNPM
+        else
+          printf "${RED}Exiting without download.${RESET}"
+        fi
+      shopt -u nocasematch
+    else
+      printf "${RED}Exiting without running${RESET} ${BG}BowerToNPM\n${RESET}."
+    fi
+  shopt -u nocasematch
+}
+
+while getopts ":b|:e|:h|:n|:p|:w" opt; do
   case $opt in
     b)
       update_bc=false
       ;;
     h)
-      printf "${BBLUE}  O${BRED}p${BYELLOW}t${BBLUE}i${BGREEN}o${BRED}n${BBLUE}s${RESET}${BG}:  ${RESET}\n"
-      printf "${BLUE}-b${RESET}: DO ${BOLD}NOT${RESET} update ${BG}bower components${RESET} (also keeps pre-existing bower_components folder)\n"
-      printf "${BLUE}-e${RESET}: Download some ${BG}test cases${RESET}\n"
-      printf "${BLUE}-n${RESET}: Do ${BOLD}NOT${RESET} update ${BG}node modules${RESET} (also keeps pre-existing node_modules folder)\n"
-      printf "${BLUE}-p${RESET}: Use ${BG}modified Polymer 1.0${RESET} version\n"
-      printf "${BLUE}-w${RESET}: Use ${BG}wget${RESET} instead of ${BG}curl${RESET}\n"
-      printf "${BLUE}-h${RESET}: For ${BG}help${RESET}, i.e. printing this message again. ¯\_(ツ)_/¯\n"
+      print_help
       exit 1
       ;;
     n)
       update_np=false
       ;;
-    \?)
-      echo "Invalid option: -$OPTARG" >&2
-      exit 1
+    p)
+      use_modified_polymer
       ;;
   esac
 done
 
-if [ "$update_bc" = true ]; then
-  rm -r bower_components
+if [[ "$update_bc" == true ]]; then
+  rm -rf bower_components
   bower update
 fi
 
-if [ "$update_np" = true ]; then
-  rm -r node_modules
+if [[ "$update_np" == true ]]; then
+  rm -rf node_modules
   npm update
+fi
+
+if [[ "$modified_polymer" == true ]]; then
+  npm rm @polymer/polymer -g
+  cd polymer
+  npm link @polymer/polymer
+  cd ..
+  npm link @polymer/polymer
+  change_paths
 fi
