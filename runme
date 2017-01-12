@@ -1,103 +1,35 @@
-## update Bower components and Node modules
-rm -rf bower_components || true
-rm -rf node_modues || true
-npm update
-bower update
+BLUE='\033[0;34m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+RED='\033[0;31m'
+RESET='\033[0m'
 
-## Download sources -- Mac
-mkdir -p data
-mkdir -p src
+BBLUE='\033[1;34;107m'
+BGREEN='\033[1;32;107m'
+BYELLOW='\033[1;33;107m'
+BRED='\033[1;31;107m'
 
-# Pesto Example
-cd src
-curl https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/pesto/src/app-icons.html -o app-icons.html
-curl https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/pesto/src/recipe-app.html -o recipe-app.html
-curl https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/pesto/src/recipe-detail.html -o recipe-detail.html
-curl https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/pesto/src/recipe-list.html -o recipe-list.html
+BOLD='\033[1m'
+BG='\033[107m'
 
-cd ../data
-curl https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/pesto/data/recipes.json -o recipes.json
-
-cd ../
-curl https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/pesto/manifest.json -o pesto_manifest.json
-curl https://gist.githubusercontent.com/namchid/04a1228579999ef0da804fc487dbbda7/raw/254ee9093cb8a58cc7b4df3330012016300c3773/pesto_index.html -o index.html
-curl https://gist.githubusercontent.com/namchid/84cff467ea29cacdfb7e30fe62ff4813/raw/dc8f2c9cad1e968dfaf7bc87f1c178ba3afc5e5d/pesto_index_shadow.html -o indexshadow.html
-
-# Shrine Example
-cd src
-curl https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/shrine/src/shrine-app.html -o shrine-app.html
-curl https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/shrine/src/shrine-detail.html -o shrine-detail.html
-curl https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/shrine/src/shrine-featured-item.html -o shrine-featured-item.html
-curl https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/shrine/src/shrine-item.html -o shrine-item.html
-curl https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/shrine/src/shrine-list.html -o shrine-list.html
-curl https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/shrine/src/shrine-simple-item.html -o shrine-simple-item.html
-
-cd ../data
-curl https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/shrine/data/featured.json -o featured.json
-curl https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/shrine/data/items.json -o items.json
-
-cd ../
-curl https://gist.githubusercontent.com/namchid/1bc67db681086d709d50379991ef9966/raw/95ff542d791397d66dd61e98b90f3e334838146a/shrine_manifest.json -o shrine_manifest.json
-curl https://gist.githubusercontent.com/namchid/211418bb0a27a9f13d5fee339f078bb0/raw/37b7af5983057408dcc89a5bad6a204b075a826b/shrine_index.html -o index2.html
-curl https://gist.githubusercontent.com/namchid/c845f1e2ce99ec2b8070eecef9da56c1/raw/9ea104adb68e5cb602b8ac80a5030239f6af46dd/shrine_index_shadow.html -o index2shadow.html
-
-# Getting Started Example
-cd src
-curl https://gist.githubusercontent.com/namchid/1aa5752f386e08419f87e5b6bcd7edd8/raw/7f336fc6ff146bf49fdb029629c4be5f17a959d3/x-app.html -o x-app.html
-
-cd ../
-curl https://gist.githubusercontent.com/namchid/04a4442469152cb2fb6c193589fece73/raw/c329fb499a2aa0c649052b11e7423b973d9e90c4/getting_started_index.html -o index3.html
-curl https://gist.githubusercontent.com/namchid/93f6e9be3897ed0436a63d67592b3f83/raw/c6d6049d853fb81a3b9eafbbdaab839049d64414/getting_started_index_shadow.html -o index3shadow.html
-
-# A simple Polymer 2.0 example for testing multiple shadow roots
-curl https://gist.githubusercontent.com/namchid/4c25d137a1e213580a83a48f404b29ac/raw/687476236fc030f562be80ed1fc04609920862e0/index4shadow.html -o index4shadow.html
-
-# Shop Example
-
-# News Example
-
-## ~~~~~~~~~~~~~~~~~~~~~~~~ Download sources -- use this instead if on Linux ~~~~~~~~~~~~~~~~~~~~~~~~
-
-# # Pesto Example
-# cd src
-# wget https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/pesto/src/app-icons.html
-# wget https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/pesto/src/recipe-app.html
-# wget https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/pesto/src/recipe-detail.html
-# wget https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/pesto/src/recipe-list.html
-
-# cd ../data
-# wget https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/pesto/data/recipes.json
-
-# cd ../
-# wget -O pesto_manifest.json https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/pesto/manifest.json
-# wget -O index.html https://gist.githubusercontent.com/namchid/04a1228579999ef0da804fc487dbbda7/raw/254ee9093cb8a58cc7b4df3330012016300c3773/pesto_index.html
-# wget -O indexshadow.html https://gist.githubusercontent.com/namchid/84cff467ea29cacdfb7e30fe62ff4813/raw/dc8f2c9cad1e968dfaf7bc87f1c178ba3afc5e5d/pesto_index_shadow.html
-
-# # Shrine Example
-# cd src
-# wget https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/shrine/src/shrine-app.html
-# wget https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/shrine/src/shrine-detail.html
-# wget https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/shrine/src/shrine-featured-item.html
-# wget https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/shrine/src/shrine-item.html
-# wget https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/shrine/src/shrine-list.html
-# wget https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/shrine/src/shrine-simple-item.html
-
-# cd ../data
-# wget https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/shrine/data/featured.json
-# wget https://raw.githubusercontent.com/PolymerElements/app-layout/master/templates/shrine/data/items.json
-
-# cd ../
-# wget -O shrine_manifest.json https://gist.githubusercontent.com/namchid/1bc67db681086d709d50379991ef9966/raw/95ff542d791397d66dd61e98b90f3e334838146a/shrine_manifest.json
-# wget -O index2.html https://gist.githubusercontent.com/namchid/211418bb0a27a9f13d5fee339f078bb0/raw/37b7af5983057408dcc89a5bad6a204b075a826b/shrine_index.html
-# wget -O index2shadow.html https://gist.githubusercontent.com/namchid/c845f1e2ce99ec2b8070eecef9da56c1/raw/9ea104adb68e5cb602b8ac80a5030239f6af46dd/shrine_index_shadow.html
-
-# Getting Started Example
-# cd src
-# wget https://gist.githubusercontent.com/namchid/1aa5752f386e08419f87e5b6bcd7edd8/raw/7f336fc6ff146bf49fdb029629c4be5f17a959d3/x-app.html
-
-# cd ../
-# wget -O index3.html https://gist.githubusercontent.com/namchid/04a4442469152cb2fb6c193589fece73/raw/c329fb499a2aa0c649052b11e7423b973d9e90c4/getting_started_index.html
-# wget -O index3shadow.html https://gist.githubusercontent.com/namchid/93f6e9be3897ed0436a63d67592b3f83/raw/c6d6049d853fb81a3b9eafbbdaab839049d64414/getting_started_index_shadow.html
-
-# A simple Polymer 2.0 example for testing multiple shadow roots
-# wget https://gist.githubusercontent.com/namchid/4c25d137a1e213580a83a48f404b29ac/raw/687476236fc030f562be80ed1fc04609920862e0
+while getopts "b|:e|:h|:n|:p|:w" opt; do
+  case $opt in
+    h)
+      printf "${BBLUE}  O${BRED}p${BYELLOW}t${BBLUE}i${BGREEN}o${BRED}n${BBLUE}s${RESET}${BG}:  ${RESET}\n"
+      printf "${BLUE}-b${RESET}: DO ${BOLD}NOT${RESET} update ${BG}bower components${RESET} (also keeps pre-existing bower_components folder)\n"
+      printf "${BLUE}-e${RESET}: Download some ${BG}test cases${RESET}\n"
+      printf "${BLUE}-n${RESET}: Do ${BOLD}NOT${RESET} update ${BG}node modules${RESET} (also keeps pre-existing node_modules folder)\n"
+      printf "${BLUE}-p${RESET}: Use ${BG}modified Polymer 1.0${RESET} version\n"
+      printf "${BLUE}-w${RESET}: Use ${BG}wget${RESET} instead of ${BG}curl${RESET}\n"
+      printf "${BLUE}-h${RESET}: For ${BG}help${RESET}, i.e. printing this message again. ¯\_(ツ)_/¯\n"
+      exit 1
+      ;;
+    a)
+      echo "-a was triggered, Parameter: $OPTARG" >&2
+      ;;
+    \?)
+      echo "Invalid option: -$OPTARG" >&2
+      exit 1
+      ;;
+  esac
+done
