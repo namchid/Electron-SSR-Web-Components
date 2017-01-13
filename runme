@@ -49,65 +49,57 @@ curl_examples() {
   mkdir -p data
   mkdir -p src
 
-  if [[ "$modified_polymer" == true ]]; then
-    printf "Curling M examples"
-  else
-    printf "${BLUE}Downloading examples...${RESET}\n"
-    # Pesto Example
-    cd src
-    curl -s -L https://goo.gl/ILwX3j -o app-icons.html
+  printf "${BLUE}Downloading examples...${RESET}\n"
+  # Pesto Example
+  cd src
+  curl -s -L https://goo.gl/ILwX3j -o app-icons.html
 
-    curl -s -L https://goo.gl/Tg2Wm3 -o recipe-app.html
-    curl -s -L https://goo.gl/h2tzGk -o recipe-detail.html
-    curl -s -L https://goo.gl/hHgYal -o recipe-list.html
+  curl -s -L https://goo.gl/Tg2Wm3 -o recipe-app.html
+  curl -s -L https://goo.gl/h2tzGk -o recipe-detail.html
+  curl -s -L https://goo.gl/hHgYal -o recipe-list.html
 
-    cd ../data
-    curl -s -L https://goo.gl/dmNXVE -o recipes.json
+  cd ../data
+  curl -s -L https://goo.gl/dmNXVE -o recipes.json
 
-    cd ../
-    curl -s -L https://goo.gl/DwbCss -o pesto_manifest.json
-    curl -s -L https://goo.gl/rBBVWg -o index.html
-    curl -s -L https://goo.gl/AIouLS -o indexshadow.html
+  cd ../
+  curl -s -L https://goo.gl/DwbCss -o pesto_manifest.json
+  curl -s -L https://goo.gl/rBBVWg -o index.html
+  curl -s -L https://goo.gl/AIouLS -o indexshadow.html
 
-    # Shrine Example
-    cd src
-    curl -s -L https://goo.gl/fMMNfl -o shrine-app.html
-    curl -s -L https://goo.gl/tyrD1G -o shrine-detail.html
-    curl -s -L https://goo.gl/I7wT3y -o shrine-featured-item.html
-    curl -s -L https://goo.gl/MaZREb -o shrine-item.html
-    curl -s -L https://goo.gl/CSi8iZ -o shrine-list.html
-    curl -s -L https://goo.gl/s1tuuc -o shrine-simple-item.html
+  # Shrine Example
+  cd src
+  curl -s -L https://goo.gl/fMMNfl -o shrine-app.html
+  curl -s -L https://goo.gl/tyrD1G -o shrine-detail.html
+  curl -s -L https://goo.gl/I7wT3y -o shrine-featured-item.html
+  curl -s -L https://goo.gl/MaZREb -o shrine-item.html
+  curl -s -L https://goo.gl/CSi8iZ -o shrine-list.html
+  curl -s -L https://goo.gl/s1tuuc -o shrine-simple-item.html
 
-    cd ../data
-    curl -s -L https://goo.gl/5KGt2k -o featured.json
-    curl -s -L https://goo.gl/pw8jdW -o items.json
+  cd ../data
+  curl -s -L https://goo.gl/5KGt2k -o featured.json
+  curl -s -L https://goo.gl/pw8jdW -o items.json
 
-    cd ../
-    curl -s -L https://goo.gl/kgO6qw -o shrine_manifest.json
-    curl -s -L https://goo.gl/AX5aie -o index2.html
-    curl -s -L https://goo.gl/oUo6lu -o index2shadow.html
+  cd ../
+  curl -s -L https://goo.gl/kgO6qw -o shrine_manifest.json
+  curl -s -L https://goo.gl/AX5aie -o index2.html
+  curl -s -L https://goo.gl/oUo6lu -o index2shadow.html
 
-    # Getting Started Example
-    cd src
-    curl -s -L https://goo.gl/CQ7Nkc -o x-app.html
+  # Getting Started Example
+  cd src
+  curl -s -L https://goo.gl/CQ7Nkc -o x-app.html
 
-    cd ../
-    curl -s -L https://goo.gl/FFYNKx -o index3.html
-    curl -s -L https://goo.gl/SZbIRR -o index3shadow.html
-    printf "${BLUE}Examples downloaded. Check the ${RESET}${BG}src/${RESET} "
-    printf "${BLUE}directory and${RESET} ${BG}index*.html${RESET} ${BLUE}files.${RESET}\n"
-  fi
+  cd ../
+  curl -s -L https://goo.gl/FFYNKx -o index3.html
+  curl -s -L https://goo.gl/SZbIRR -o index3shadow.html
+  printf "${BLUE}Examples downloaded. Check the ${RESET}${BG}src/${RESET} "
+  printf "${BLUE}directory and${RESET} ${BG}index*.html${RESET} ${BLUE}files.${RESET}\n"
 }
 
 wget_examples() {
   mkdir -p data
   mkdir -p src
 
-  if [[ "$modified_polymer" == true ]]; then
-    printf "TODO\n"
-  else
-    printf "TODO\n"
-  fi
+  printf "${RED}TODO. Skipping this for now because I cURL.${RESET}"
 }
 
 change_paths() {
@@ -130,6 +122,16 @@ change_paths() {
       shopt -s nocasematch
         if [[ $input == "yes" ]] || [[ $input == "y" ]]; then
           java BowerToNPM -s < _default_bower_to_npm_inputs.txt
+          if [[ "$download_examples" == true ]]; then
+            _p='node_modules/@polymer/polymer/polymer.html\n'
+            _wc='node_modules/@polymer/polymer/node_modules/webcomponents.js/webcomponents-lite.js\n'
+            _op='bower_components/polymer/polymer.html\n'
+            _owc='bower_components/webcomponentsjs/webcomponents-lite.js\nsrc'
+            txt=$_p$_wc$_op$_owc
+            cp /dev/null _default_bower_to_npm_inputs.txt
+            echo -e ${txt} >> _default_bower_to_npm_inputs.txt
+            java BowerToNPM -s < _default_bower_to_npm_inputs.txt
+          fi
         elif [[ $input == "no" ]] || [[ $input == "n" ]]; then
           java BowerToNPM
         else
@@ -176,6 +178,14 @@ if [[ "$update_np" == true ]]; then
   npm update
 fi
 
+if [[ "$download_examples" == true ]]; then
+  if [[ "$use_wget" == true ]]; then
+    wget_examples
+  else
+    curl_examples
+  fi
+fi
+
 if [[ "$modified_polymer" == true ]]; then
   npm rm @polymer/polymer -g
   cd polymer
@@ -184,12 +194,4 @@ if [[ "$modified_polymer" == true ]]; then
   npm link @polymer/polymer
   change_paths
   mv _modified_polymer_shadow.html polymer/node_modules/\@polymer/polymer/src/mini/shadow.html
-fi
-
-if [[ "$download_examples" == true ]]; then
-  if [[ "$use_wget" == true ]]; then
-    wget_examples
-  else
-    curl_examples
-  fi
 fi
