@@ -126,11 +126,23 @@ change_paths() {
             _p='node_modules/@polymer/polymer/polymer.html\n'
             _wc='node_modules/@polymer/polymer/node_modules/webcomponents.js/webcomponents-lite.js\n'
             _op='bower_components/polymer/polymer.html\n'
-            _owc='bower_components/webcomponentsjs/webcomponents-lite.js\nsrc'
-            txt=$_p$_wc$_op$_owc
+            _owc='bower_components/webcomponentsjs/webcomponents-lite.js\n'
+            _dir='src'
+            txt=$_p$_wc$_op$_owc$_dir
+
             cp /dev/null _default_bower_to_npm_inputs.txt
             echo -e ${txt} >> _default_bower_to_npm_inputs.txt
             java BowerToNPM -s < _default_bower_to_npm_inputs.txt
+
+            files=("index.html" "index2.html" "index3.html" "indexshadow.html" "index2shadow.html" "index3shadow.html")
+            for i in "${files[@]}"
+            do
+              tmp=$_p$_wc$_op$_owc$i
+              cp /dev/null _default_bower_to_npm_inputs.txt
+              echo -e ${tmp} >> _default_bower_to_npm_inputs.txt
+              java BowerToNPM -s < _default_bower_to_npm_inputs.txt
+            done
+
           fi
         elif [[ $input == "no" ]] || [[ $input == "n" ]]; then
           java BowerToNPM
@@ -142,6 +154,10 @@ change_paths() {
       printf "${RED}Exiting without running${RESET} ${BG}BowerToNPM\n${RESET}."
     fi
   shopt -u nocasematch
+}
+
+cleanup() {
+  rm BowerToNPM*.class
 }
 
 while getopts ":b|:e|:h|:n|:p|:w" opt; do
@@ -195,3 +211,5 @@ if [[ "$modified_polymer" == true ]]; then
   change_paths
   mv _modified_polymer_shadow.html polymer/node_modules/\@polymer/polymer/src/mini/shadow.html
 fi
+
+cleanup
