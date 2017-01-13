@@ -16,6 +16,8 @@ YES_NO="(${RESET}${GREEN}Y${RESET}${BLUE}/${RESET}${RED}n${RESET}${BLUE}) ${RESE
 update_bc=true
 update_np=true
 modified_polymer=false
+use_wget=false
+download_examples=false
 
 print_help() {
   printf "${BBLUE}  O${BRED}p${BYELLOW}t${BBLUE}i${BGREEN}o${BRED}n${BBLUE}s${RESET}${BG}:  ${RESET}\n"
@@ -43,6 +45,71 @@ use_modified_polymer() {
   shopt -u nocasematch
 }
 
+curl_examples() {
+  mkdir -p data
+  mkdir -p src
+
+  if [[ "$modified_polymer" == true ]]; then
+    printf "Curling M examples"
+  else
+    printf "${BLUE}Downloading examples...${RESET}\n"
+    # Pesto Example
+    cd src
+    curl -s -L https://goo.gl/ILwX3j -o app-icons.html
+
+    curl -s -L https://goo.gl/Tg2Wm3 -o recipe-app.html
+    curl -s -L https://goo.gl/h2tzGk -o recipe-detail.html
+    curl -s -L https://goo.gl/hHgYal -o recipe-list.html
+
+    cd ../data
+    curl -s -L https://goo.gl/dmNXVE -o recipes.json
+
+    cd ../
+    curl -s -L https://goo.gl/DwbCss -o pesto_manifest.json
+    curl -s -L https://goo.gl/rBBVWg -o index.html
+    curl -s -L https://goo.gl/AIouLS -o indexshadow.html
+
+    # Shrine Example
+    cd src
+    curl -s -L https://goo.gl/fMMNfl -o shrine-app.html
+    curl -s -L https://goo.gl/tyrD1G -o shrine-detail.html
+    curl -s -L https://goo.gl/I7wT3y -o shrine-featured-item.html
+    curl -s -L https://goo.gl/MaZREb -o shrine-item.html
+    curl -s -L https://goo.gl/CSi8iZ -o shrine-list.html
+    curl -s -L https://goo.gl/s1tuuc -o shrine-simple-item.html
+
+    cd ../data
+    curl -s -L https://goo.gl/5KGt2k -o featured.json
+    curl -s -L https://goo.gl/pw8jdW -o items.json
+
+    cd ../
+    curl -s -L https://goo.gl/kgO6qw -o shrine_manifest.json
+    curl -s -L https://goo.gl/AX5aie -o index2.html
+    curl -s -L https://goo.gl/oUo6lu -o index2shadow.html
+
+    # Getting Started Example
+    cd src
+    curl -s -L https://goo.gl/CQ7Nkc -o x-app.html
+
+    cd ../
+    curl -s -L https://goo.gl/FFYNKx -o index3.html
+    curl -s -L https://goo.gl/SZbIRR -o index3shadow.html
+    printf "${BLUE}Examples downloaded. Check the ${RESET}${BG}src/${RESET} "
+    printf "${BLUE}directory and${RESET} ${BG}index*.html${RESET} ${BLUE}files.${RESET}\n"
+  fi
+}
+
+wget_examples() {
+  mkdir -p data
+  mkdir -p src
+
+  if [[ "$modified_polymer" == true ]]; then
+    printf "TODO\n"
+  else
+    printf "TODO\n"
+  fi
+}
+
 change_paths() {
   printf "${BOLD}Paths must be converted from Polymer in ${BG}bower_components${RESET}${BOLD} to "
   printf "Polymer in ${BG}node_modules${RESET}.\n${RESET}"
@@ -56,7 +123,7 @@ change_paths() {
       javac BowerToNPM.java
 
       printf "${BLUE}Attempt to use default paths for ${RESET}${BG}webcomponentsjs${RESET} "
-      printf "and ${BG}polymer${RESET}${BLUE}? ${RESET}"
+      printf "${BLUE}and${RESET} ${BG}polymer${RESET}${BLUE}? ${RESET}"
       printf "${YES_NO}"
 
       read input
@@ -80,6 +147,9 @@ while getopts ":b|:e|:h|:n|:p|:w" opt; do
     b)
       update_bc=false
       ;;
+    e)
+      download_examples=true
+      ;;
     h)
       print_help
       exit 1
@@ -89,6 +159,9 @@ while getopts ":b|:e|:h|:n|:p|:w" opt; do
       ;;
     p)
       use_modified_polymer
+      ;;
+    w)
+      use_wget=true
       ;;
   esac
 done
@@ -110,4 +183,13 @@ if [[ "$modified_polymer" == true ]]; then
   cd ..
   npm link @polymer/polymer
   change_paths
+  mv _modified_polymer_shadow.html polymer/node_modules/\@polymer/polymer/src/mini/shadow.html
+fi
+
+if [[ "$download_examples" == true ]]; then
+  if [[ "$use_wget" == true ]]; then
+    wget_examples
+  else
+    curl_examples
+  fi
 fi
