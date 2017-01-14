@@ -31,18 +31,55 @@ Clone the project:
 git clone git@github.com:namchid/Electron-SSR-Web-Components.git
 ```
 
-Install/update packages for Polymer and Node. **Note: This step will set up server dependencies, but not download example tests. See next step.**
+### Manual Configurations
+
+**Note:** This is not recommended when setting up the server environment for the first time. Instead, skip to the ***Guided Configurations*** subsection below.
+
+Install/update packages for Polymer and Node. **Note:** This step will set up server dependencies, but not download example tests; see ***Guided Configurations*** below.
 ```
 bower update
 npm update
 ```
 
-Alternatively, execute the RUNME script to install Polymer and Node packages (same as previous step) and download files for testing:
+**Optionally**, use a modified, unoffical version Polymer 1.0 does not attach multiple shadow roots. If you do not want to do that at this time, skip to ***Running the Server***.
+
+Check out Polymer:
 ```
-./runme
+git clone https://github.com/Polymer/polymer.git
 ```
 
-Run Electron app locally:
+Create a symlink for the downloaded Polymer folder:
+```
+npm link polymer/@polymer/polymer
+```
+
+Replace the Polymer `shadow.html` file:
+```
+mv _modified_polymer_shadow.html polymer/node_modules/\@polymer/polymer/src/mini/shadow.html
+```
+
+Replace paths in `bower_components`. **Note:** If this file has been changed, modify it manually or redownload it from this repository.
+```
+javac BowerToNPM.java
+java BowerToNPM -s < _default_bower_to_npm_inputs.txt
+```
+
+### Guided Configurations
+
+**Note:** This is the alternative to the ***Manual Configurations*** subsection above. If you have already followed the steps above, you can still run this to choose your settings.
+
+Execute the `runme` script to install Polymer and Node packages (same as previous step) and download files for testing:
+```
+./runme -h
+```
+
+By default, executing the `runme` will update Bower components and node modules. It will NOT download examples or use the modified Polymer version. To do so, use the following flags and follow instructions:
+```
+./runme -pe
+```
+
+### Running the Server
+
 ```
 electron .
 ```
