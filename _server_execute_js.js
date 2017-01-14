@@ -55,7 +55,7 @@ module.exports = function() {
     * placeholder tags for shadow roots and later upgrades
     * by registering the custom elements with proper styling and
     * reimporting HTML for interactivity.
-    * 
+    *
     * This has been modified from Kevin's WC-SSR (link in README)
     **/
     shadowVersion: function() {
