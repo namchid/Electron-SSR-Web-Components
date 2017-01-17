@@ -121,10 +121,10 @@ change_paths() {
       read input
       shopt -s nocasematch
         if [[ $input == "yes" ]] || [[ $input == "y" ]]; then
-          _p='/node_modules/@polymer/polymer/polymer.html\n'
-          _wc='/node_modules/@polymer/polymer/node_modules/webcomponents.js/webcomponents-lite.js\n'
-          _op='/polymer/polymer.html\n'
-          _owc='/webcomponentsjs/webcomponents-lite.js\n'
+          _p='node_modules/@polymer/polymer/polymer.html\n'
+          _wc='node_modules/@polymer/polymer/node_modules/webcomponents.js/webcomponents-lite.js\n'
+          _op='bower_components/polymer/polymer.html\n'
+          _owc='bower_components/webcomponentsjs/webcomponents-lite.js\n'
           _dir='bower_components\n'
           txt=$_p$_wc$_op$_owc$_dir
 
@@ -133,17 +133,6 @@ change_paths() {
           java BowerToNPM -s < _default_bower_to_npm_inputs.txt
           
           if [[ "$download_examples" == true ]]; then
-            _p=$'node_modules/@polymer/polymer/polymer.html\n'
-            _wc=$'node_modules/@polymer/polymer/node_modules/webcomponents.js/webcomponents-lite.js\n'
-            _op=$'bower_components/polymer/polymer.html\n'
-            _owc=$'bower_components/webcomponentsjs/webcomponents-lite.js\n'
-
-            txt=$_p$_wc$_op$_owc$_dir
-
-            cp /dev/null _default_bower_to_npm_inputs.txt
-            echo -e ${txt} >> _default_bower_to_npm_inputs.txt
-            java BowerToNPM -s < _default_bower_to_npm_inputs.txt
-
             files=("index.html" "index2.html" "index3.html" "indexshadow.html" "index2shadow.html" "index3shadow.html")
             for i in "${files[@]}"
             do
@@ -153,8 +142,8 @@ change_paths() {
               java BowerToNPM -s < _default_bower_to_npm_inputs.txt
             done
 
-            _dir=$'src'
-            tmp=$_p$_wc$_op$_owc$_dir
+            _tmpDir='src'
+            tmp=$_p$_wc$_op$_owc$_tmpDir
             cp /dev/null _default_bower_to_npm_inputs.txt
             echo -e ${tmp} >> _default_bower_to_npm_inputs.txt
             java BowerToNPM -s < _default_bower_to_npm_inputs.txt

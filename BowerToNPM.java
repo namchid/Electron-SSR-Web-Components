@@ -15,6 +15,7 @@ public class BowerToNPM {
     private static final String BLUE = "\u001B[34m";
     private static final String BOLD = "\033[0;1m";
     private static final String GREEN = "\u001B[32m";
+    private static final String RED = "\u001B[31m";
     private static final String RESET = "\033[0;0m";
 
     private static void convert(Path polymerPath, Path wcPath, Path oldPolymerPath, Path oldWcPath, Path directory) {
@@ -58,6 +59,8 @@ public class BowerToNPM {
                         StringBuilder sb = new StringBuilder();
                         String line = "";
 
+                        System.out.println(relativePolymerPath + "\t" + relativeOldPolymerPath);
+                        
                         while((line = reader.readLine()) != null) {
                             line = line.replaceAll(relativeOldPolymerPath, relativePolymerPath);
                             line = line.replaceAll(relativeOldWcPath, relativeWcPath);
@@ -104,8 +107,9 @@ public class BowerToNPM {
     // Note: This must return an absolute path
     private static Path checkPath(String path) {
         if(!new File(path).exists()) {
-            System.err.println("Invalid path: " + path);
-            System.exit(1);
+            // Assumes that even though the path is invalid,
+            // the user knows which relative directory path gshould be.
+            System.out.println(RED + "WARNING: " + RESET + "Invalid path: " + path + " , continuing anyway.");
         }
         
         return Paths.get(new File(path).getAbsolutePath());
