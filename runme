@@ -148,6 +148,12 @@ change_paths() {
               java BowerToNPM -s < _default_bower_to_npm_inputs.txt
             done
 
+            _dir=$'src'
+            tmp=$_p$_wc$_op$_owc$_dir
+            cp /dev/null _default_bower_to_npm_inputs.txt
+            echo -e ${tmp} >> _default_bower_to_npm_inputs.txt
+            java BowerToNPM -s < _default_bower_to_npm_inputs.txt
+
           fi
         elif [[ $input == "no" ]] || [[ $input == "n" ]]; then
           java BowerToNPM
