@@ -59,8 +59,6 @@ public class BowerToNPM {
                         StringBuilder sb = new StringBuilder();
                         String line = "";
 
-                        System.out.println(relativePolymerPath + "\t" + relativeOldPolymerPath);
-                        
                         while((line = reader.readLine()) != null) {
                             line = line.replaceAll(relativeOldPolymerPath, relativePolymerPath);
                             line = line.replaceAll(relativeOldWcPath, relativeWcPath);

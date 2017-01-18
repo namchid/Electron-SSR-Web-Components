@@ -15,20 +15,21 @@ YES_NO="(${RESET}${GREEN}Y${RESET}${BLUE}/${RESET}${RED}n${RESET}${BLUE}) ${RESE
 
 update_bc=true
 update_np=true
+try_using_modified_polymer=false
 modified_polymer=false
-use_wget=false
 download_examples=false
 
+# Prints flag options for user
 print_help() {
   printf "${BBLUE}  O${BRED}p${BYELLOW}t${BBLUE}i${BGREEN}o${BRED}n${BBLUE}s${RESET}${BG}:  ${RESET}\n"
   printf "${BLUE}-b${RESET}: DO ${BOLD}NOT${RESET} update ${BG}bower components${RESET} (also keeps pre-existing bower_components folder)\n"
   printf "${BLUE}-e${RESET}: Download some ${BG}test cases${RESET}\n"
   printf "${BLUE}-n${RESET}: Do ${BOLD}NOT${RESET} update ${BG}node modules${RESET} (also keeps pre-existing node_modules folder)\n"
   printf "${BLUE}-p${RESET}: Use ${BG}modified Polymer 1.0${RESET} version\n"
-  printf "${BLUE}-w${RESET}: Use ${BG}wget${RESET} instead of ${BG}curl${RESET}\n"
   printf "${BLUE}-h${RESET}: For ${BG}help${RESET}, i.e. printing this message again. ¯\_(ツ)_/¯\n"
 }
 
+# Attempt to download the Polymer repository
 use_modified_polymer() {
   printf "${BOLD}To use the modified Polymer 1.0 version:${RESET}\n"
 
@@ -38,13 +39,13 @@ use_modified_polymer() {
   shopt -s nocasematch
     if [[ $input == "yes" ]] || [[ $input == "y" ]]; then
       git clone "https://github.com/Polymer/polymer.git"
-      modified_polymer=true
     else
       printf "${RED}Exiting without download.${RESET}"
     fi
   shopt -u nocasematch
 }
 
+# Use cURL to download examples for the server
 curl_examples() {
   mkdir -p data
   mkdir -p src
@@ -95,13 +96,8 @@ curl_examples() {
   printf "${BLUE}directory and${RESET} ${BG}index*.html${RESET} ${BLUE}files.${RESET}\n"
 }
 
-wget_examples() {
-  mkdir -p data
-  mkdir -p src
-
-  printf "${RED}TODO. Skipping this for now because I cURL.${RESET}"
-}
-
+# Change paths linked to bower_components/.../polymer.html and webcomponents.js to
+# The polymer.html and webcomponentsjs from the modified Polymer code
 change_paths() {
   printf "${BOLD}Paths must be converted from Polymer in ${BG}bower_components${RESET}${BOLD} to "
   printf "Polymer in ${BG}node_modules${RESET}.\n${RESET}"
@@ -120,6 +116,7 @@ change_paths() {
 
       read input
       shopt -s nocasematch
+        # Change paths of files in bower_components/ directory
         if [[ $input == "yes" ]] || [[ $input == "y" ]]; then
           _p='node_modules/@polymer/polymer/polymer.html\n'
           _wc='node_modules/@polymer/polymer/node_modules/webcomponents.js/webcomponents-lite.js\n'
@@ -133,6 +130,7 @@ change_paths() {
           java BowerToNPM -s < _default_bower_to_npm_inputs.txt
           
           if [[ "$download_examples" == true ]]; then
+            # Change paths of downloaded example files in the current directory
             files=("index.html" "index2.html" "index3.html" "indexshadow.html" "index2shadow.html" "index3shadow.html")
             for i in "${files[@]}"
             do
@@ -142,6 +140,7 @@ change_paths() {
               java BowerToNPM -s < _default_bower_to_npm_inputs.txt
             done
 
+            # Change paths of downloaded example files in the src/ directory
             _tmpDir='src'
             tmp=$_p$_wc$_op$_owc$_tmpDir
             cp /dev/null _default_bower_to_npm_inputs.txt
@@ -150,6 +149,7 @@ change_paths() {
 
           fi
         elif [[ $input == "no" ]] || [[ $input == "n" ]]; then
+          # Lets the user enter inputs for BowerToNPM.java manually
           java BowerToNPM
         else
           printf "${RED}Exiting without download.${RESET}"
@@ -161,11 +161,13 @@ change_paths() {
   shopt -u nocasematch
 }
 
+# Clean up by removing Java class files
 cleanup() {
   rm BowerToNPM*.class
 }
 
-while getopts ":b|:e|:h|:n|:p|:w" opt; do
+# Parse flags from user for setting up the environment
+while getopts ":b|:e|:h|:n|:p" opt; do
   case $opt in
     b)
       update_bc=false
@@ -181,32 +183,35 @@ while getopts ":b|:e|:h|:n|:p|:w" opt; do
       update_np=false
       ;;
     p)
-      use_modified_polymer
-      ;;
-    w)
-      use_wget=true
+      try_using_modified_polymer=true
       ;;
   esac
 done
 
+# Update bower components by default unless flag -b set
 if [[ "$update_bc" == true ]]; then
   rm -rf bower_components
   bower update
 fi
 
+# Update node modules by default unless flag -n set
 if [[ "$update_np" == true ]]; then
   rm -rf node_modules
   npm update
 fi
 
+# Download examples files for testing if flag -e set
 if [[ "$download_examples" == true ]]; then
-  if [[ "$use_wget" == true ]]; then
-    wget_examples
-  else
-    curl_examples
-  fi
+  curl_examples
 fi
 
+# Attempt to download the Polymer library if flag -p set
+if [[ "$try_using_modified_polymer" == true ]]; then
+  use_modified_polymer
+fi
+
+# Attempt to change changes based on the modified Polymer library if
+# it was downloaded successfully in the previous step
 if [[ "$modified_polymer" == true ]]; then
   npm rm @polymer/polymer -g
   cd polymer
