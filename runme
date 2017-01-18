@@ -39,6 +39,7 @@ use_modified_polymer() {
   shopt -s nocasematch
     if [[ $input == "yes" ]] || [[ $input == "y" ]]; then
       git clone "https://github.com/Polymer/polymer.git"
+      modified_polymer=true
     else
       printf "${RED}Exiting without download.${RESET}"
     fi
