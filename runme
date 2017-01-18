@@ -56,7 +56,7 @@ curl_examples() {
   cd src
   curl -s -L https://goo.gl/ILwX3j -o app-icons.html
 
-  curl -s -L https://goo.gl/Tg2Wm3 -o recipe-app.html
+  curl -s -L https://goo.gl/hbKryv -o recipe-app.html
   curl -s -L https://goo.gl/h2tzGk -o recipe-detail.html
   curl -s -L https://goo.gl/hHgYal -o recipe-list.html
 
@@ -65,12 +65,12 @@ curl_examples() {
 
   cd ../
   curl -s -L https://goo.gl/DwbCss -o pesto_manifest.json
-  curl -s -L https://goo.gl/rBBVWg -o index.html
-  curl -s -L https://goo.gl/AIouLS -o indexshadow.html
+  curl -s -L https://goo.gl/AMSOKT -o index.html
+  curl -s -L https://goo.gl/ZQjNqo -o indexshadow.html
 
   # Shrine Example
   cd src
-  curl -s -L https://goo.gl/fMMNfl -o shrine-app.html
+  curl -s -L https://goo.gl/anBAEt -o shrine-app.html
   curl -s -L https://goo.gl/tyrD1G -o shrine-detail.html
   curl -s -L https://goo.gl/I7wT3y -o shrine-featured-item.html
   curl -s -L https://goo.gl/MaZREb -o shrine-item.html
@@ -83,8 +83,8 @@ curl_examples() {
 
   cd ../
   curl -s -L https://goo.gl/kgO6qw -o shrine_manifest.json
-  curl -s -L https://goo.gl/AX5aie -o index2.html
-  curl -s -L https://goo.gl/oUo6lu -o index2shadow.html
+  curl -s -L https://goo.gl/omvoeN -o index2.html
+  curl -s -L https://goo.gl/0XScHA -o index2shadow.html
 
   # Getting Started Example
   cd src
