@@ -23,10 +23,10 @@ module.exports = function() {
         makePathsRelative(html);
 
         ipcRenderer.send('receiveSerializedDOM',
-                         html.documentElement.outerHTML, false);
+                         html.documentElement.outerHTML, true);
       } else {
         ipcRenderer.send('receiveSerializedDOM',
-                         document.documentElement.outerHTML, false);
+                         document.documentElement.outerHTML, true);
       }
     },
     /**

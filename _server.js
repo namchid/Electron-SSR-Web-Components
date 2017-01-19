@@ -111,6 +111,8 @@ shadyServer.get(/\/index[0-9]*.html/, (req, res) => {
   shadyRes = res;
 
   win.webContents.on('did-finish-load', () => {
+    // To use the hybrid version instead, use this instead:
+    // shadyThenShadowGetDOMInsidePage();
     shadyGetDOMInsidePage();
   });
 });
@@ -120,9 +122,7 @@ shadowServer.get(/\/index[0-9]*shadow.html/, (req, res) => {
   shadowRes = res;
 
   win.webContents.on('did-finish-load', () => {
-    // To use the hybrid version instead, use this instead:
-    // shadyThenShadowGetDOMInsidePage();
-    shadowGetDOMInsidePage();
+    // shadowGetDOMInsidePage();
   });
 });
 
