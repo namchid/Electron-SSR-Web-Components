@@ -1,6 +1,6 @@
 const electron = require('electron');
 const express = require('express');
-const LRUCache = require('./lruCache');
+const LRUCache = require('./_lruCache');
 const ngrok = require('ngrok');
 const path = require('path');
 const url = require('url');
@@ -87,7 +87,7 @@ app.on('window-all-closed', () => {
 });
 
 app.on('activate', () => {
-  if (mainWindow === null) {
+  if (win === null) {
     createWindow();
   }
 });
@@ -111,6 +111,8 @@ shadyServer.get(/\/index[0-9]*.html/, (req, res) => {
   shadyRes = res;
 
   win.webContents.on('did-finish-load', () => {
+    // To use the hybrid version instead, use this instead:
+    // shadyThenShadowGetDOMInsidePage();
     shadyGetDOMInsidePage();
   });
 });
@@ -120,9 +122,7 @@ shadowServer.get(/\/index[0-9]*shadow.html/, (req, res) => {
   shadowRes = res;
 
   win.webContents.on('did-finish-load', () => {
-    // To use the hybrid version instead, use this instead:
-    // shadyThenShadowGetDOMInsidePage();
-    shadowGetDOMInsidePage();
+    // shadowGetDOMInsidePage();
   });
 });
 
