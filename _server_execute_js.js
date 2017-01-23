@@ -7,26 +7,36 @@ module.exports = function() {
     */
     hybridVersion: function() {
       const ipcRenderer = require('electron').ipcRenderer;
+      const remote = require('electron').remote;
+      let pc = remote.getGlobal('pageCache');
+      let cachedValue = pc.get('_true_' + document.documentElement.outerHTML);
 
-      if (document.querySelectorAll('link[rel="import"]').length > 0) {
-        let html = document.cloneNode(true);
-        html.querySelector('body').removeAttribute('unresolved');
+      if(cachedValue == -1) {
+        if (document.querySelectorAll('link[rel="import"]').length > 0) {
+          let html = document.cloneNode(true);
+          html.querySelector('body').removeAttribute('unresolved');
 
-        let shadowPolymerScript = document.createElement('script');
-        shadowPolymerScript.innerText =
-            'window.Polymer = { dom: "shadow"}';
-        let imports = html.querySelectorAll('link[rel="import"]');
-        html.querySelector('head').insertBefore(shadowPolymerScript,
-          imports[0]);
+          let shadowPolymerScript = document.createElement('script');
+          shadowPolymerScript.innerText =
+              'window.Polymer = { dom: "shadow"}';
+          let imports = html.querySelectorAll('link[rel="import"]');
+          html.querySelector('head').insertBefore(shadowPolymerScript,
+            imports[0]);
 
-        removeImportsAndSetInCache(html);
-        makePathsRelative(html);
+          removeImportsAndSetInCache(html);
+          makePathsRelative(html);
 
-        ipcRenderer.send('receiveSerializedDOM',
-                         html.documentElement.outerHTML, true);
+          ipcRenderer.send('receiveSerializedDOM',
+                           html.documentElement.outerHTML, true, true,
+                           document.documentElement.outerHTML);
+        } else {
+          ipcRenderer.send('receiveSerializedDOM',
+                           document.documentElement.outerHTML, true, true,
+                           document.documentElement.outerHTML);
+        }
       } else {
         ipcRenderer.send('receiveSerializedDOM',
-                         document.documentElement.outerHTML, true);
+                        cachedValue, true, false, '');
       }
     },
     /**
@@ -35,18 +45,28 @@ module.exports = function() {
     */
     shadyVersion: function() {
       const ipcRenderer = require('electron').ipcRenderer;
+      const remote = require('electron').remote;
+      let pc = remote.getGlobal('pageCache');
+      let cachedValue = pc.get('_true_' + document.documentElement.outerHTML);
 
-      if (document.querySelectorAll('link[rel="import"]').length > 0) {
-        let html = document.cloneNode(true);
-        html.querySelector('body').removeAttribute('unresolved');
-        removeImportsAndSetInCache(html);
-        makePathsRelative(html);
+      if(cachedValue == -1) {
+        if (document.querySelectorAll('link[rel="import"]').length > 0) {
+          let html = document.cloneNode(true);
+          html.querySelector('body').removeAttribute('unresolved');
+          removeImportsAndSetInCache(html);
+          makePathsRelative(html);
 
-        ipcRenderer.send('receiveSerializedDOM',
-                         html.documentElement.outerHTML, true);
+          ipcRenderer.send('receiveSerializedDOM',
+                           html.documentElement.outerHTML, true, true,
+                           document.documentElement.outerHTML);
+        } else {
+          ipcRenderer.send('receiveSerializedDOM',
+                           document.documentElement.outerHTML, true, true,
+                           document.documentElement.outerHTML);
+        }
       } else {
         ipcRenderer.send('receiveSerializedDOM',
-                         document.documentElement.outerHTML, true);
+                         cachedValue, true, false, '');
       }
     },
     /**
@@ -250,6 +270,10 @@ module.exports = function() {
       }
 
       const ipcRenderer = require('electron').ipcRenderer;
+      const remote = require('electron').remote;
+      let pc = remote.getGlobal('pageCache');
+      let cachedValue = pc.get('_false_' + document.documentElement.outerHTML);
+
       const hash = require('string-hash');
       let hashKey = '';
       let hashValue = '';
@@ -257,24 +281,30 @@ module.exports = function() {
       let shadowStyleList = [];
       let shadowStyleMap = {};
       const space = String.fromCharCode(13);
-
       const doc = document.documentElement;
       let clonedDoc = doc.cloneNode(true);
-      clonedDoc.querySelector('body').removeAttribute('unresolved');
 
-      replaceShadowRoots(doc, clonedDoc);
-      removeImports(clonedDoc);
-      hashKey = hash(hashKey);
-      if(hashValue != '') {
-        ipcRenderer.send('setAsyncImports', hashKey, hashValue);
+      if(cachedValue == -1) {
+        clonedDoc.querySelector('body').removeAttribute('unresolved');
+
+        replaceShadowRoots(doc, clonedDoc);
+        removeImports(clonedDoc);
+        hashKey = hash(hashKey);
+        if(hashValue != '') {
+          ipcRenderer.send('setAsyncImports', hashKey, hashValue);
+        }
+        removeScripts(clonedDoc);
+        insertShadowStyles(clonedDoc, shadowStyleList);
+        insertScriptsAndImports(clonedDoc, hashKey);
+
+        makePathsRelative(clonedDoc);
+
+        ipcRenderer.send('receiveSerializedDOM', clonedDoc.outerHTML, false,
+                        true, document.documentElement.outerHTML);
+      } else {
+        ipcRenderer.send('receiveSerializedDOM', clonedDoc.outerHTML, false,
+                        false, '');
       }
-      removeScripts(clonedDoc);
-      insertShadowStyles(clonedDoc, shadowStyleList);
-      insertScriptsAndImports(clonedDoc, hashKey);
-
-      makePathsRelative(clonedDoc);
-
-      ipcRenderer.send('receiveSerializedDOM', clonedDoc.outerHTML, false);
     },
   };
 };

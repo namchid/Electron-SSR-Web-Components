@@ -1,6 +1,6 @@
 const electron = require('electron');
 const express = require('express');
-const LRUCache = require('./_lruCache');
+global.LRUCache = require('./_lruCache');
 const ngrok = require('ngrok');
 const path = require('path');
 const url = require('url');
@@ -18,6 +18,8 @@ let shadyRes = null;
 const shadyServer = express();
 let win = null;
 
+global.pageCache = new LRUCache(100);
+
 global.directory = 'file://' + __dirname + '/';
 
 /**
@@ -28,6 +30,9 @@ function createWindow() {
   win = new BrowserWindow({width: 800, height: 600});
   win.loadURL('data:text/html;charset:utf-8,<html></html>');
   win.webContents.openDevTools();
+
+  pageCache.set('1st', 'hello world');
+  console.log(pageCache);
 
   win.on('closed', () => {
     win = null;
@@ -93,7 +98,12 @@ app.on('activate', () => {
 });
 
 // IPC functions
-ipcMain.on('receiveSerializedDOM', (_, contents, isShady) => {
+ipcMain.on('receiveSerializedDOM', (_, contents, isShady, setPageCache,
+                                    originalHTML) => {
+  if(setPageCache) {
+    pageCache.set('_' + isShady + '_' + originalHTML, contents);
+  }
+
   if (isShady) {
     shadyRes.end(contents);
   } else {
