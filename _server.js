@@ -122,7 +122,7 @@ shadowServer.get(/\/index[0-9]*shadow.html/, (req, res) => {
   shadowRes = res;
 
   win.webContents.on('did-finish-load', () => {
-    // shadowGetDOMInsidePage();
+    shadowGetDOMInsidePage();
   });
 });
 
