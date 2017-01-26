@@ -31,9 +31,6 @@ function createWindow() {
   win.loadURL('data:text/html;charset:utf-8,<html></html>');
   win.webContents.openDevTools();
 
-  pageCache.set('1st', 'hello world');
-  console.log(pageCache);
-
   win.on('closed', () => {
     win = null;
   });
