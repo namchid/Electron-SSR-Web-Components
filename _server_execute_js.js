@@ -8,18 +8,18 @@ module.exports = function() {
     hybridVersion: function() {
       const ipcRenderer = require('electron').ipcRenderer;
       const remote = require('electron').remote;
-      let pc = remote.getGlobal('pageCache');
-      let cachedValue = pc.get('_true_' + document.documentElement.outerHTML);
+      const pc = remote.getGlobal('pageCache');
+      const cachedValue = pc.get('_true_' + document.documentElement.outerHTML);
 
-      if(cachedValue == -1) {
+      if(cachedValue === -1) {
         if (document.querySelectorAll('link[rel="import"]').length > 0) {
-          let html = document.cloneNode(true);
+          const html = document.cloneNode(true);
           html.querySelector('body').removeAttribute('unresolved');
 
-          let shadowPolymerScript = document.createElement('script');
+          const shadowPolymerScript = document.createElement('script');
           shadowPolymerScript.innerText =
               'window.Polymer = { dom: "shadow"}';
-          let imports = html.querySelectorAll('link[rel="import"]');
+          const imports = html.querySelectorAll('link[rel="import"]');
           html.querySelector('head').insertBefore(shadowPolymerScript,
             imports[0]);
 
@@ -46,12 +46,12 @@ module.exports = function() {
     shadyVersion: function() {
       const ipcRenderer = require('electron').ipcRenderer;
       const remote = require('electron').remote;
-      let pc = remote.getGlobal('pageCache');
-      let cachedValue = pc.get('_true_' + document.documentElement.outerHTML);
+      const pc = remote.getGlobal('pageCache');
+      const cachedValue = pc.get('_true_' + document.documentElement.outerHTML);
 
-      if(cachedValue == -1) {
+      if(cachedValue === -1) {
         if (document.querySelectorAll('link[rel="import"]').length > 0) {
-          let html = document.cloneNode(true);
+          const html = document.cloneNode(true);
           html.querySelector('body').removeAttribute('unresolved');
           removeImportsAndSetInCache(html);
           makePathsRelative(html);
@@ -84,7 +84,7 @@ module.exports = function() {
       * @param {Object} container The element to remove scripts from.
       */
       function removeScripts(container) {
-        let scripts = container.querySelectorAll('script');
+        const scripts = container.querySelectorAll('script');
         [].slice.call(scripts).forEach(function(el) {
           el.remove();
         });
@@ -122,7 +122,7 @@ module.exports = function() {
             style.setAttribute('shadow-style', style.index);
             shadowStyleList.push(style);
           }
-          let shadowStyle = document.createElement('shadow-style');
+          const shadowStyle = document.createElement('shadow-style');
           shadowStyle.setAttribute('index', style.index);
           el.parentNode.replaceChild(shadowStyle, el);
         });
@@ -139,7 +139,7 @@ module.exports = function() {
       */
       function replaceShadowRoot(el, clonedEl) {
         if (el.shadowRoot) {
-          let shadowRoot = document.createElement('shadow-root');
+          const shadowRoot = document.createElement('shadow-root');
           for (let e = el.shadowRoot.firstChild; e; e = e.nextSibling) {
             shadowRoot.appendChild(e.cloneNode(true));
           }
@@ -171,7 +171,7 @@ module.exports = function() {
       * @param {Object} list The list of previously removed styles.
       */
       function insertShadowStyles(doc, list) {
-        let template = document.createElement('template');
+        const template = document.createElement('template');
         template.setAttribute('shadow-styles', '');
         list.forEach(function(style) {
           template.content.appendChild(style);
@@ -185,11 +185,11 @@ module.exports = function() {
       function registerShadowRoot() {
         const t = document.querySelector('template[shadow-styles]');
         const shadowStyles = t && t.content.children;
-        let proto = Object.create(HTMLElement.prototype);
+        const proto = Object.create(HTMLElement.prototype);
         proto.createdCallback = function() {
-          let parent = this.parentNode;
+          const parent = this.parentNode;
           if (parent) {
-            let shadowRoot = parent.createShadowRoot();
+            const shadowRoot = parent.createShadowRoot();
             let child;
             while ((child = this.firstChild)) {
               if (child.localName == 'shadow-style') {
@@ -211,13 +211,13 @@ module.exports = function() {
       function insertPolymerShadowDom() {
         const head = document.querySelector('head');
 
-        let scriptNode = document.createElement('script');
+        const scriptNode = document.createElement('script');
         scriptNode.setAttribute(
             'src',
             'bower_components/webcomponentsjs/webcomponents-lite.js');
         head.insertBefore(scriptNode, head.firstChild);
 
-        let script = document.createElement('script');
+        const script = document.createElement('script');
         script.textContent =
             'window.Polymer = {dom: "shadow"}';
         head.insertBefore(script, head.firstChild.nextSibling);
@@ -229,7 +229,7 @@ module.exports = function() {
       * imports string in the server's cache.
       */
       function insertImportLink(hashedNum) {
-        let linkNode = document.createElement('link');
+        const linkNode = document.createElement('link');
         linkNode.setAttribute('rel', 'import');
         linkNode.setAttribute('href', hashedNum);
         linkNode.setAttribute('async', '');
@@ -257,7 +257,7 @@ module.exports = function() {
       * imports string in the server's cache.
       */
       function insertScriptsAndImports(clonedDoc, hashedNum) {
-        let scripts = document.createElement('script');
+        const scripts = document.createElement('script');
 
         scripts.textContent = insertPolymerShadowDom.toString();
         scripts.textContent += space + registerShadowRoot.toString();
@@ -271,20 +271,20 @@ module.exports = function() {
 
       const ipcRenderer = require('electron').ipcRenderer;
       const remote = require('electron').remote;
-      let pc = remote.getGlobal('pageCache');
-      let cachedValue = pc.get('_false_' + document.documentElement.outerHTML);
+      const pc = remote.getGlobal('pageCache');
+      const cachedValue = pc.get('_false_' + document.documentElement.outerHTML);
 
       const hash = require('string-hash');
       let hashKey = '';
       let hashValue = '';
-      let removedImports = new Set();
-      let shadowStyleList = [];
-      let shadowStyleMap = {};
+      const removedImports = new Set();
+      const shadowStyleList = [];
+      const shadowStyleMap = {};
       const space = String.fromCharCode(13);
       const doc = document.documentElement;
-      let clonedDoc = doc.cloneNode(true);
+      const clonedDoc = doc.cloneNode(true);
 
-      if(cachedValue == -1) {
+      if(cachedValue === -1) {
         clonedDoc.querySelector('body').removeAttribute('unresolved');
 
         replaceShadowRoots(doc, clonedDoc);
@@ -339,7 +339,7 @@ function removeImportsAndSetInCache(container) {
   let hashKey = '';
   let hashValue = '';
 
-  let imports = container.querySelectorAll('link[rel="import"]');
+  const imports = container.querySelectorAll('link[rel="import"]');
   imports.forEach((linkNode) => {
     hashValue += linkNode.outerHTML;
     hashKey += linkNode['href'];
@@ -349,7 +349,7 @@ function removeImportsAndSetInCache(container) {
   require('electron').ipcRenderer.sendSync('setAsyncImports',
     hashKey, hashValue);
 
-  let newImport = container.createElement('link');
+  const newImport = container.createElement('link');
   newImport.setAttribute('rel', 'import');
   newImport.setAttribute('href', '_asyncImport' + hashKey + '.html');
   newImport.setAttribute('async', '');

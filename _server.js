@@ -7,7 +7,7 @@ const url = require('url');
 
 const app = electron.app;
 const BrowserWindow = electron.BrowserWindow;
-let cache = new LRUCache(100);
+const cache = new LRUCache(100);
 const ipcMain = electron.ipcMain;
 let listening = false;
 const shadowPort = 4000;
