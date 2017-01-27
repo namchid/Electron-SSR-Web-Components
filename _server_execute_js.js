@@ -192,7 +192,7 @@ module.exports = function() {
             const shadowRoot = parent.createShadowRoot();
             let child;
             while ((child = this.firstChild)) {
-              if (child.localName == 'shadow-style') {
+              if (child.localName === 'shadow-style') {
                 child.remove();
                 child = shadowStyles[child.getAttribute('index')].cloneNode(
                     true);
