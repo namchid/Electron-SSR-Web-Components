@@ -10,6 +10,7 @@ const BrowserWindow = electron.BrowserWindow;
 const cache = new LRUCache(100);
 const ipcMain = electron.ipcMain;
 let listening = false;
+const localhost = '127.0.0.1';
 const shadowPort = 4000;
 let shadowRes = null;
 const shadowServer = express();
@@ -18,9 +19,8 @@ let shadyRes = null;
 const shadyServer = express();
 let win = null;
 
-global.pageCache = new LRUCache(100);
-
 global.directory = 'file://' + __dirname + '/';
+global.pageCache = new LRUCache(100);
 
 /**
 * Creates an instance of the Electron BrowserWindow with the DevTools open
