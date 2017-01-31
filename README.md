@@ -66,7 +66,7 @@ java BowerToNPM -s < _default_bower_to_npm_inputs.txt
 
 ### Guided Configurations
 
-**Note:** This is the alternative to the ***Manual Configurations*** subsection above. If you have already followed the steps above, you can still run this to choose your settings.
+**Note:** This is the alternative to the ***Manual Configurations*** subsection above. The `runme` and `BowerToNPM` class are designed for macOS and Linux-based systems (sorry, Windows users). If you have already followed the steps above, you can still run this to choose your settings.
 
 Execute the `runme` script to install Polymer and Node packages (same as previous step) and download files for testing:
 ```
@@ -110,7 +110,7 @@ If you prefer a different naming scheme or directory structure, add or modify th
 ### Testing Server Performance
 One way to test the performance of this server is through [WebpageTest]. Because ngrok exposes the server to the Internet, you can use the generated ngrok URL followed by the name of the file to test. 
 
-## Notes
+## Additional Notes
 
 Parts of the JavaScript code executed on the server for serving documents that use shadow DOM are adapted from Kevin Schaaf's [WC-SSR].
 

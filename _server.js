@@ -1,15 +1,16 @@
 const electron = require('electron');
 const express = require('express');
-const LRUCache = require('./_lruCache');
+global.LRUCache = require('./_lruCache');
 const ngrok = require('ngrok');
 const path = require('path');
 const url = require('url');
 
 const app = electron.app;
 const BrowserWindow = electron.BrowserWindow;
-let cache = new LRUCache(100);
+const cache = new LRUCache(100);
 const ipcMain = electron.ipcMain;
 let listening = false;
+const localhost = '127.0.0.1';
 const shadowPort = 4000;
 let shadowRes = null;
 const shadowServer = express();
@@ -19,6 +20,7 @@ const shadyServer = express();
 let win = null;
 
 global.directory = 'file://' + __dirname + '/';
+global.pageCache = new LRUCache(100);
 
 /**
 * Creates an instance of the Electron BrowserWindow with the DevTools open
@@ -93,7 +95,12 @@ app.on('activate', () => {
 });
 
 // IPC functions
-ipcMain.on('receiveSerializedDOM', (_, contents, isShady) => {
+ipcMain.on('receiveSerializedDOM', (_, contents, isShady, setPageCache,
+                                    originalHTML) => {
+  if(setPageCache) {
+    pageCache.set('_' + isShady + '_' + originalHTML, contents);
+  }
+
   if (isShady) {
     shadyRes.end(contents);
   } else {
@@ -122,7 +129,7 @@ shadowServer.get(/\/index[0-9]*shadow.html/, (req, res) => {
   shadowRes = res;
 
   win.webContents.on('did-finish-load', () => {
-    // shadowGetDOMInsidePage();
+    shadowGetDOMInsidePage();
   });
 });
 
